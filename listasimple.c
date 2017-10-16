@@ -1,18 +1,19 @@
 /*
- * listasimple.c
+ * Lista.c
  *
  *  Created on: 8 Oct 2017
  *      Author: Yoel
  */
 
-#include "listaSimple.h"
+#include "lista.h"
+#include "main.h"
 #include <malloc.h>
 #include <memory.h>
 
 /* ls_Crear
 Pre: Ls no fue creada.
 Post: Ls creada y vacía */
-void ls_Crear(TListaSimple *pLs, int TamanioDato){
+void ls_Crear(TLista *pLs, int TamanioDato){
 	pLs->Corriente = NULL;
 	pLs->Primero = NULL;
 	pLs->TamanioDato = TamanioDato;
@@ -21,7 +22,7 @@ void ls_Crear(TListaSimple *pLs, int TamanioDato){
 /* ls_Vaciar
 Pre: Ls creada.
 Post: Ls vacía.*/
-void ls_Vaciar(TListaSimple *pLs){
+void ls_Vaciar(TLista *pLs){
 	TNodoSimple *pNodo, *siguiente;
 	for(pNodo = pLs->Primero;(pNodo);pNodo=siguiente){
 		siguiente = pNodo->Siguiente;
@@ -34,21 +35,21 @@ void ls_Vaciar(TListaSimple *pLs){
 /* ls_Vacia
 Pre: Ls creada.
 Post: Si Ls tiene elementos devuelve FALSE sino TRUE.*/
-int ls_Vacia(TListaSimple Ls){
+int ls_Vacia(TLista Ls){
 	return (Ls.Primero == NULL);
 }
 
 /* ls_ElemCorriente
 Pre: Ls creada y no vacía.
 Post: Se devuelve en E el elemento corriente de la lista.*/
-void ls_ElemCorriente(TListaSimple Ls, void *pE){
+void ls_ElemCorriente(TLista Ls, void *pE){
 	memcpy(pE, Ls.Corriente->Elem, Ls.TamanioDato);
 }
 
 /* ls_ModifCorriente
 Pre: Ls creada y no vacía.
 Post: El contenido del elemento actual quedo actualizado con E. */
-void ls_ModifCorriente(TListaSimple *pLs, void* pE){
+void ls_ModifCorriente(TLista *pLs, void* pE){
 	memcpy(pLs->Corriente->Elem, pE, pLs->TamanioDato);
 }
 
@@ -59,7 +60,7 @@ Si M = LS_PRIMERO, el nuevo elemento corriente es el primero. Devuelve TRUE
 Si M = LS_SIGUIENTE, el nuevo elemento corriente es el siguiente al
 anterior. Si estaba en el último elemento, devuelve FALSE, sino TRUE.
 Si M = LS_ANTERIOR, devuelve FALSE. */
-int ls_MoverCorriente(TListaSimple *pLs, TMovimiento_Ls M){
+int ls_MoverCorriente(TLista *pLs, TMovimiento_Ls M){
 	switch (M){
 		case LS_PRIMERO: pLs->Corriente=pLs->Primero;
 		break;
@@ -77,7 +78,7 @@ int ls_MoverCorriente(TListaSimple *pLs, TMovimiento_Ls M){
 Pre: Ls creada y no vacía.
 Post: Se eliminó el elemento corriente, El nuevo elemento es el siguiente o
 el anterior si el corriente era el último elemento.*/
-void ls_BorrarCorriente(TListaSimple *pLs){
+void ls_BorrarCorriente(TLista *pLs){
 	TNodoSimple *PNodo=pLs->Corriente;
 	if (pLs->Corriente==pLs->Primero){
 		pLs->Primero = pLs->Corriente->Siguiente;
@@ -103,7 +104,7 @@ Si M=LS_PRIMERO: se insertó como primero de la lista.
 Si M=LS_SIGUIENTE: se insertó después del elemento corriente.
 Si M=LS_ANTERIOR: se insertó antes del elemento corriente.
 Si pudo insertar el elemento devuelve TRUE, sino FALSE.*/
-int ls_Insertar(TListaSimple *pLs, TMovimiento_Ls M, void* pE){
+int ls_Insertar(TLista *pLs, TMovimiento_Ls M, void* pE){
 	TNodoSimple *pNodo = (TNodoSimple*) malloc(sizeof(TNodoSimple));
 	if (!pNodo)
 		return FALSE; //No hay memoria disponible

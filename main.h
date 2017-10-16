@@ -11,6 +11,9 @@
 #define RES_OK 0
 #define RES_ERROR -1
 
+#define FALSE 0
+#define TRUE -1
+
 /*
  * Crea el documentador inicializando su estructura con los datos necesarios.
  *
