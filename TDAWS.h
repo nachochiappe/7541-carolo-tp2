@@ -8,7 +8,10 @@
 #ifndef TDAWS_H_
 #define TDAWS_H_
 
-
+#include "cola.h"
+#include "lista.h"
+#include "pila.h"
+#include "TDAWSOperacion.h"
 
 typedef struct TDAWS{
 	TDAWSOperacion TOperacion; /*Operación actual que se consume*/
