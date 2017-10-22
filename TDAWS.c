@@ -26,7 +26,6 @@ int TDAWS_Crear(TDAWS *ws, char *cmd) {
 
 	char *path_operaciones;
 	char *path_clientes;
-	char *path_log;
 
 	FILE *arch_config = fopen(path_config,"r");
 
@@ -40,7 +39,7 @@ int TDAWS_Crear(TDAWS *ws, char *cmd) {
 			path_clientes = strtok(NULL, "=");
 		}
 		else if (strcmp(token, "pathLog") == 0) {
-			path_log = strtok(NULL, "=");
+			continue;
 		}
 		else {
 			printf("El archivo de configuración tiene valores incorrectos.\n");
@@ -159,6 +158,32 @@ int TDAWS_Consumir(TDAWS *ws) {
 }
 
 int TDAWS_Destruir(TDAWS *ws) {
+	char str[50];
+	char *token;
+	char *path_log;
+
+	FILE *arch_config = fopen(path_config,"r");
+
+	for (unsigned int i = 0; i < 3; i++) {
+		fgets(str, sizeof(str), arch_config);
+		token = strtok(str, "=");
+		if (strcmp(token, "pathLog") == 0) {
+			path_log = strtok(NULL, "=");
+		}
+		else {
+			printf("No existe variable 'pathLog' en archivo de configuracion.\n");
+			return -1;
+		}
+	}
+
+	while (C_Vacia(&ws->CEjecucion) == 0) {
+		TDAWSOperacion* operacion;
+		C_Sacar(&ws->CEjecucion, operacion);
+		// escribir en pathLog
+	}
+	C_Vaciar(&ws->CEjecucion);
+
+	ls_Vaciar(&ws->TClientes);
 
 	return 0;
 }
