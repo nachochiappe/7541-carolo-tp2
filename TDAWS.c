@@ -136,20 +136,7 @@ int TDAWS_Crear(TDAWS *ws, char *cmd) {
 }
 
 int TDAWS_OperacionValida(TDAWS *ws) {
-	char operacion_valida = 0;
-	char nombre_operacion[20];
-	ls_ElemCorriente(ws->LOperaciones, nombre_operacion);
-	while (operacion_valida == 0) {
-		if (strcmp(ws->TOperacion.dOperacion, nombre_operacion) == 0) {
-			operacion_valida = 1;
-		}
-		else {
-			if(ls_MoverCorriente(&ws->LOperaciones, LS_SIGUIENTE) != 1) {
-				return -1;
-			}
-		}
-	}
-	return 0;
+	return (validateOperation(ws, 0));
 }
 
 int TDAWS_Consumir(TDAWS *ws) {

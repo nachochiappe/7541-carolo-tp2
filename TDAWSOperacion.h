@@ -28,6 +28,6 @@ void getAllClients(TDAWS *ws, char por_consola);
 
 void getAllOperations(TDAWS *ws, char por_consola);
 
-void validateOperation(TDAWS *ws, char por_consola);
+int validateOperation(TDAWS *ws, char por_consola);
 
 #endif /* TDAWSOPERACION_H_ */
