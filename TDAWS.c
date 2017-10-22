@@ -13,6 +13,7 @@
 #include "lista.h"
 #include "pila.h"
 #include "TDAWS.h"
+#include "TDAWSOperacion.h"
 
 #define path_config "SERVERTP2GRUPAL.conf"
 
@@ -152,7 +153,30 @@ int TDAWS_OperacionValida(TDAWS *ws) {
 }
 
 int TDAWS_Consumir(TDAWS *ws) {
-
+	if (strcmp(ws->TOperacion.cOperacion, "getTime") == 0) {
+		getTime(ws, 1);
+	}
+	else if (strcmp(ws->TOperacion.cOperacion, "getMaxIdClient") == 0) {
+		getMaxIdClient(ws, 1);
+	}
+	else if (strcmp(ws->TOperacion.cOperacion, "setMaxIdClient") == 0) {
+		setMaxIdClient(ws, 1);
+	}
+	else if (strcmp(ws->TOperacion.cOperacion, "getClientById") == 0) {
+		getClientById(ws, 1);
+	}
+	else if (strcmp(ws->TOperacion.cOperacion, "setClientById") == 0) {
+		setClientById(ws, 1);
+	}
+	else if (strcmp(ws->TOperacion.cOperacion, "getAllClients") == 0) {
+		getAllClients(ws, 1);
+	}
+	else if (strcmp(ws->TOperacion.cOperacion, "getAllOperations") == 0) {
+		getAllOperations(ws, 1);
+	}
+	else if (strcmp(ws->TOperacion.cOperacion, "validateOperation") == 0) {
+		validateOperation(ws, 1);
+	}
 	return 0;
 }
 
