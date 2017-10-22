@@ -13,7 +13,6 @@
 #include "lista.h"
 #include "pila.h"
 #include "TDAWS.h"
-#include "TElemCliente.h"
 
 #define path_config "SERVERTP2GRUPAL.conf"
 
@@ -181,7 +180,7 @@ int TDAWS_Destruir(TDAWS *ws) {
 	FILE *arch_log = fopen(path_log,"r+");
 
 	while (C_Vacia(ws->CEjecucion) == 0) {
-		TDAWSOperacion* operacion;
+		TDAWSOperacion* operacion = (TDAWSOperacion*) malloc(sizeof(TDAWSOperacion));
 		C_Sacar(&ws->CEjecucion, operacion);
 		fputs(operacion->dOperacion, arch_log);
 		fputs(";", arch_log);
@@ -191,6 +190,7 @@ int TDAWS_Destruir(TDAWS *ws) {
 		fputs(";", arch_log);
 		fputs(operacion->cResponse, arch_log);
 		fputs("\n", arch_log);
+		free(operacion);
 	}
 	C_Vaciar(&ws->CEjecucion);
 
@@ -198,7 +198,7 @@ int TDAWS_Destruir(TDAWS *ws) {
 
 	ls_Vaciar(&ws->TClientes);
 
-	free(&ws);
+	free(ws);
 
 	return 0;
 }

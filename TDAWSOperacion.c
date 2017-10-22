@@ -5,6 +5,8 @@
  *      Author: Yoel
  */
 
+#include "TDAWSOperacion.h"
+
 void parserXML(TDAWS *ws) {
 
 }

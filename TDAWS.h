@@ -8,17 +8,7 @@
 #ifndef TDAWS_H_
 #define TDAWS_H_
 
-#include "cola.h"
-#include "lista.h"
-#include "pila.h"
-#include "TDAWSOperacion.h"
-
-typedef struct TDAWS{
-	TDAWSOperacion TOperacion; /*Operación actual que se consume*/
-	TLista LOperaciones; /* Lista con las operaciones disponibles */
-	TLista TClientes; /*Lista de TDAClientes con cantidad*/
-	TCola CEjecucion; /*Cola con las operaciones ejecutadas*/
-} TDAWS;
+#include "structs.h"
 
 /* PRE: ninguna
  POST: inicializa la estructura de servicios y de clientes para poder consumir los servicios
