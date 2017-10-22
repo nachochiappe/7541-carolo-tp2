@@ -181,6 +181,7 @@ int TDAWS_Destruir(TDAWS *ws) {
 
 	while (C_Vacia(ws->CEjecucion) == 0) {
 		TDAWSOperacion* operacion = (TDAWSOperacion*) malloc(sizeof(TDAWSOperacion));
+		if (!operacion) return -1;
 		C_Sacar(&ws->CEjecucion, operacion);
 		fputs(operacion->dOperacion, arch_log);
 		fputs(";", arch_log);
