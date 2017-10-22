@@ -176,12 +176,25 @@ int TDAWS_Destruir(TDAWS *ws) {
 		}
 	}
 
+	fclose(arch_config);
+
+	FILE *arch_log = fopen(path_log,"r+");
+
 	while (C_Vacia(&ws->CEjecucion) == 0) {
 		TDAWSOperacion* operacion;
 		C_Sacar(&ws->CEjecucion, operacion);
-		// escribir en pathLog
+		fputs(operacion->dOperacion, arch_log);
+		fputs(";", arch_log);
+		fputs(operacion->cOperacion, arch_log);
+		fputs(";", arch_log);
+		fputs(operacion->cRequest, arch_log);
+		fputs(";", arch_log);
+		fputs(operacion->cResponse, arch_log);
+		fputs("\n", arch_log);
 	}
 	C_Vaciar(&ws->CEjecucion);
+
+	fclose(path_log);
 
 	ls_Vaciar(&ws->TClientes);
 
