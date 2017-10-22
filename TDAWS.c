@@ -180,7 +180,7 @@ int TDAWS_Destruir(TDAWS *ws) {
 
 	FILE *arch_log = fopen(path_log,"r+");
 
-	while (C_Vacia(&ws->CEjecucion) == 0) {
+	while (C_Vacia(ws->CEjecucion) == 0) {
 		TDAWSOperacion* operacion;
 		C_Sacar(&ws->CEjecucion, operacion);
 		fputs(operacion->dOperacion, arch_log);
@@ -194,9 +194,11 @@ int TDAWS_Destruir(TDAWS *ws) {
 	}
 	C_Vaciar(&ws->CEjecucion);
 
-	fclose(path_log);
+	fclose(arch_log);
 
 	ls_Vaciar(&ws->TClientes);
+
+	free(&ws);
 
 	return 0;
 }
