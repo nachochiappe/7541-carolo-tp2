@@ -207,14 +207,17 @@ int TDAWS_Destruir(TDAWS *ws) {
 		TDAWSOperacion* operacion = (TDAWSOperacion*) malloc(sizeof(TDAWSOperacion));
 		if (!operacion) return -1;
 		C_Sacar(&ws->CEjecucion, operacion);
-		fputs(operacion->dOperacion, arch_log);
-		fputs(";", arch_log);
-		fputs(operacion->cOperacion, arch_log);
-		fputs(";", arch_log);
-		fputs(operacion->cRequest, arch_log);
-		fputs(";", arch_log);
-		fputs(operacion->cResponse, arch_log);
-		fputs("\n", arch_log);
+		// La operación getTime no se debe loguear
+		if (strcmp(operacion->cOperacion, "getTime") != 0) {
+			fputs(operacion->dOperacion, arch_log);
+			fputs(";", arch_log);
+			fputs(operacion->cOperacion, arch_log);
+			fputs(";", arch_log);
+			fputs(operacion->cRequest, arch_log);
+			fputs(";", arch_log);
+			fputs(operacion->cResponse, arch_log);
+			fputs("\n", arch_log);
+		}
 		free(operacion);
 	}
 	C_Vaciar(&ws->CEjecucion);
