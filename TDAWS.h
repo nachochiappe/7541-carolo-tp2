@@ -13,7 +13,7 @@
 /* PRE: ninguna
  POST: inicializa la estructura de servicios y de clientes para poder consumir los servicios
 */
-int TDAWS_Crear(TDAWS * ws, char * cmd);
+int TDAWS_Crear(TDAWS * ws, char ** cmd);
 
 /* PRE: TDAWS Creado
  POST: valida que la operación a ejecutar se encuentre en la definición del servicio.

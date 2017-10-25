@@ -11,6 +11,8 @@
 #include "cola.h"
 #include "lista.h"
 
+enum formato {JSON = 1, XML = 0};
+
 typedef struct TDAWSOperacion {
 	char * cRequest; /* Request al servicio */
 	char * cResponse; /* Response del servicio*/

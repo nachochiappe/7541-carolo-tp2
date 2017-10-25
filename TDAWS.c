@@ -17,7 +17,7 @@
 
 #define path_config "SERVERTP2GRUPAL.conf"
 
-int TDAWS_Crear(TDAWS *ws, char *cmd) {
+int TDAWS_Crear(TDAWS *ws, char **cmd) {
 
 	// OBTENER VALORES DE ARCHIVO DE CONFIGURACION
 
@@ -43,7 +43,7 @@ int TDAWS_Crear(TDAWS *ws, char *cmd) {
 		}
 		else {
 			printf("El archivo de configuración tiene valores incorrectos.\n");
-			return -1;
+			return (-1);
 		}
 	}
 
@@ -62,7 +62,7 @@ int TDAWS_Crear(TDAWS *ws, char *cmd) {
 
 	ls_Crear(&ws->TClientes, sizeof(TElemCliente));
 	TElemCliente *cliente = (TElemCliente*) malloc(sizeof(TElemCliente));
-	if (!cliente) return -1;
+	if (!cliente) return (-1);
 	char linea_cliente[255];
 	FILE *arch_clientes = fopen(path_clientes,"r");
 	while (fgets(linea_cliente, sizeof(TElemCliente), arch_clientes) != NULL) {
@@ -86,53 +86,67 @@ int TDAWS_Crear(TDAWS *ws, char *cmd) {
 
 	C_Crear(&ws->CEjecucion, sizeof(TDAWSOperacion));
 	TDAWSOperacion *operacion = (TDAWSOperacion*) malloc(sizeof(TDAWSOperacion));
-	if (!operacion) return -1;
+	if (!operacion) return (-1);
 
-	/*
 	char tipo_op = 0; // 0 = POST; 1 = GET
-	char tipo_formato = 0; // 0 = JSON; 1 = XML
+	enum formato tipo_formato;
 	unsigned char i = 0;
-	if (strcmp(argv[i], "-X") == 0) {
+	if (strcmp(cmd[i], "-X") == 0) {
 		// Verifico si es GET o POST
 		i++;
-		if (strcmp(argv[i], "GET") == 0)
+		if (strcmp(cmd[i], "GET") == 0)
 			tipo_op++;
-		else if (strcmp(argv[i], "POST") != 0) return -1;
+		else if (strcmp(cmd[i], "POST") != 0) return (-1);
 
 		i++;
-		if (strcmp(argv[i], "-H") == 0) {
+		if (strcmp(cmd[i], "-H") == 0) {
 			// Verifico si es JSON o XML
 			i++;
-		if (tipo_op == 0) {
-			if (strcmp(argv[i], "\"Content-Type:application/json\"") == 0)
-				tipo_formato++;
-			else if (strcmp(argv[i], "\"Content-Type:application/xml\"") != 0) return -1;
-		}
-		else {
-			if (strcmp(argv[i], "\"Accept:application/json\"") == 0)
-				tipo_formato++;
-			else if (strcmp(argv[i], "\"Accept:application/xml\"") != 0) return -1;
-		}
+			if (tipo_op == 0) {
+				if (strcmp(cmd[i], "\"Content-Type:application/json\"") == 0)
+					tipo_formato = JSON;
+				else if (strcmp(cmd[i], "\"Content-Type:application/xml\"") != 0)
+					tipo_formato = XML;
+				else return (-1);
+			}
+			else {
+				if (strcmp(cmd[i], "\"Accept:application/json\"") == 0)
+					tipo_formato = JSON;
+				else if (strcmp(cmd[i], "\"Accept:application/xml\"") != 0)
+					tipo_formato = XML;
+				else return (-1);
+			}
 
-		// Obtengo URL donde consumir el servicio
-		i++;
-
-
-		// Parseo la data
-		i++;
-		if (strcmp(argv[i], "-d") == 0) {
-			// parsear mensaje
+			// Obtengo nombre de operación
 			i++;
+			char *URL = cmd[i];
+			token = strtok(URL, "/");
+			for (int j = 0; j <=3; j++) {
+				token = strtok(NULL, "/");
+			}
+
+			i++;
+			if (strcmp(cmd[i], "-d") == 0) {
+				i++;
+				operacion->cRequest = cmd[i]; /* Request al servicio */
+			}
+			else return (-1);
+
+
+			// Completo parámetros operación
+			operacion->cResponse = NULL;
+			operacion->cOperacion = token;
+			operacion->dOperacion = NULL;
+			if (tipo_formato == JSON) {
+				strcpy(operacion->cFormato, "JSON");
+			}
+			else
+				strcpy(operacion->cFormato, "XML");
 		}
-		else return -1;
 	}
-	else return -1;
+	else return (-1);
 
-	}
-	else return -1;
-	*/
-
-	return 0;
+	return (0);
 }
 
 int TDAWS_OperacionValida(TDAWS *ws) {
@@ -141,7 +155,7 @@ int TDAWS_OperacionValida(TDAWS *ws) {
 
 int TDAWS_Consumir(TDAWS *ws) {
 	if (strcmp(ws->TOperacion.cOperacion, "getTime") == 0) {
-		getTime(ws, 1);
+		getTime(ws, ws->TOperacion.cOperacion, 1);
 	}
 	else if (strcmp(ws->TOperacion.cOperacion, "getMaxIdClient") == 0) {
 		getMaxIdClient(ws, 1);
@@ -164,7 +178,7 @@ int TDAWS_Consumir(TDAWS *ws) {
 	else if (strcmp(ws->TOperacion.cOperacion, "validateOperation") == 0) {
 		validateOperation(ws, 1);
 	}
-	return 0;
+	return (0);
 }
 
 int TDAWS_Destruir(TDAWS *ws) {
@@ -182,7 +196,7 @@ int TDAWS_Destruir(TDAWS *ws) {
 		}
 		else {
 			printf("No existe variable 'pathLog' en archivo de configuracion.\n");
-			return -1;
+			return (-1);
 		}
 	}
 
@@ -192,7 +206,7 @@ int TDAWS_Destruir(TDAWS *ws) {
 
 	while (C_Vacia(ws->CEjecucion) == 0) {
 		TDAWSOperacion* operacion = (TDAWSOperacion*) malloc(sizeof(TDAWSOperacion));
-		if (!operacion) return -1;
+		if (!operacion) return (-1);
 		C_Sacar(&ws->CEjecucion, operacion);
 		// La operación getTime no se debe loguear
 		if (strcmp(operacion->cOperacion, "getTime") != 0) {
@@ -215,5 +229,5 @@ int TDAWS_Destruir(TDAWS *ws) {
 
 	free(ws);
 
-	return 0;
+	return (0);
 }

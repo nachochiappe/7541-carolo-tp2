@@ -14,19 +14,19 @@ void parserXML(TDAWS *ws);
 
 void parserJSON(TDAWS *ws);
 
-void getTime(TDAWS *ws, char por_consola);
+int getTime(TDAWS *ws, char *fecha, char por_consola);
 
-void getMaxIdClient(TDAWS *ws, char por_consola);
+int getMaxIdClient(TDAWS *ws, char por_consola);
 
-void setMaxIdClient(TDAWS *ws, char por_consola);
+int setMaxIdClient(TDAWS *ws, char por_consola);
 
-void getClientById(TDAWS *ws, char por_consola);
+int getClientById(TDAWS *ws, char por_consola);
 
-void setClientById(TDAWS *ws, char por_consola);
+int setClientById(TDAWS *ws, char por_consola);
 
-void getAllClients(TDAWS *ws, char por_consola);
+int getAllClients(TDAWS *ws, char por_consola);
 
-void getAllOperations(TDAWS *ws, char por_consola);
+int getAllOperations(TDAWS *ws, char por_consola);
 
 int validateOperation(TDAWS *ws, char por_consola);
 
