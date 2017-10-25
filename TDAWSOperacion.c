@@ -20,9 +20,26 @@ void parserJSON(TDAWS *ws) {
 
 }
 
+int inicializarOperacion(TDAWSOperacion *operacion) {
+	operacion->cFormato = malloc(5);
+	if (!operacion->cFormato) return (-1);
+	operacion->cOperacion = malloc(20);
+	if (!operacion->cOperacion) return (-1);
+	operacion->cRequest = malloc(200);
+	if (!operacion->cRequest) return (-1);
+	operacion->cResponse = malloc(200);
+	if (!operacion->cResponse) return (-1);
+	operacion->dOperacion = malloc(30);
+	if (!operacion->dOperacion) return (-1);
+
+	return (0);
+}
+
 int getTime(TDAWS *ws, char *fecha, char por_consola) {
 	TDAWSOperacion *operacion = (TDAWSOperacion*) malloc(sizeof(TDAWSOperacion));
 		if (!operacion) return (-1);
+
+	if (inicializarOperacion(operacion) != 0) return (-1);
 
 	time_t tiempo;
 	time(&tiempo);
@@ -145,12 +162,14 @@ int validateOperation(TDAWS *ws, char por_consola) {
 
 	ls_ElemCorriente(ws->LOperaciones, nombre_operacion);
 	while (operacion_valida == 1) {
-		if (strcmp(ws->TOperacion.dOperacion, nombre_operacion) == 0) {
+		if (strcmp(ws->TOperacion.cOperacion, nombre_operacion) == 0) {
 			operacion_valida = 0;
 			strcpy(validez, "true");
 		}
 		else
-			if (ls_MoverCorriente(&ws->LOperaciones, LS_SIGUIENTE) != 0)
+			if (ls_MoverCorriente(&ws->LOperaciones, LS_SIGUIENTE) == 0)
+				ls_ElemCorriente(ws->LOperaciones, nombre_operacion);
+			else
 				break;
 		}
 

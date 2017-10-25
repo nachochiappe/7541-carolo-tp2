@@ -97,9 +97,11 @@ int TDAWS_Crear(TDAWS *ws, char **cmd) {
 	TDAWSOperacion *operacion = (TDAWSOperacion*) malloc(sizeof(TDAWSOperacion));
 	if (!operacion) return (-1);
 
+	if (inicializarOperacion(operacion) != 0) return (-1);
+
 	char tipo_op = 0; // 0 = POST; 1 = GET
 	enum formato tipo_formato;
-	unsigned char i = 0;
+	unsigned char i = 1;
 	if (strcmp(cmd[i], "-X") == 0) {
 		// Verifico si es GET o POST
 		i++;
@@ -112,16 +114,16 @@ int TDAWS_Crear(TDAWS *ws, char **cmd) {
 			// Verifico si es JSON o XML
 			i++;
 			if (tipo_op == 0) {
-				if (strcmp(cmd[i], "\"Content-Type:application/json\"") == 0)
+				if (strcmp(cmd[i], "Content-Type:application/json") == 0)
 					tipo_formato = JSON;
-				else if (strcmp(cmd[i], "\"Content-Type:application/xml\"") != 0)
+				else if (strcmp(cmd[i], "Content-Type:application/xml") == 0)
 					tipo_formato = XML;
 				else return (-1);
 			}
 			else {
-				if (strcmp(cmd[i], "\"Accept:application/json\"") == 0)
+				if (strcmp(cmd[i], "Accept:application/json") == 0)
 					tipo_formato = JSON;
-				else if (strcmp(cmd[i], "\"Accept:application/xml\"") != 0)
+				else if (strcmp(cmd[i], "Accept:application/xml") == 0)
 					tipo_formato = XML;
 				else return (-1);
 			}
@@ -130,29 +132,34 @@ int TDAWS_Crear(TDAWS *ws, char **cmd) {
 			i++;
 			char *URL = cmd[i];
 			token = strtok(URL, "/");
-			for (int j = 0; j <=3; j++) {
+			for (int j = 0; j < 2; j++) {
 				token = strtok(NULL, "/");
 			}
 			if (strcmp(token, "getClientById") == 0)
 				token = strtok(NULL, "/");
-
-			i++;
-			if (strcmp(cmd[i], "-d") == 0) {
+			else if (strcmp(token, "setClientById") == 0) {
 				i++;
-				operacion->cRequest = cmd[i]; /* Request al servicio */
+				if (strcmp(cmd[i], "-d") == 0) {
+					i++;
+					operacion->cRequest = cmd[i];
+				}
+				else return (-1);
 			}
-			else return (-1);
-
 
 			// Completo parámetros operación
-			operacion->cResponse = NULL;
-			operacion->cOperacion = token;
-			operacion->dOperacion = NULL;
+			//operacion->cResponse = NULL;
+			//operacion->cOperacion = malloc(strlen(token) + 1);
+			strcpy(operacion->cOperacion, token);
+			//operacion->dOperacion = NULL;
 			if (tipo_formato == JSON) {
+				//operacion->cFormato = malloc(strlen("JSON") + 1);
 				strcpy(operacion->cFormato, "JSON");
 			}
-			else
+			else {
+				//operacion->cFormato = malloc(sizeof("XML") + 1);
 				strcpy(operacion->cFormato, "XML");
+			}
+			ws->TOperacion = (*operacion);
 		}
 	}
 	else return (-1);
@@ -234,6 +241,11 @@ int TDAWS_Destruir(TDAWS *ws) {
 			fputs(operacion->cResponse, arch_log);
 			fputs("\n", arch_log);
 		}
+		free(operacion->cFormato);
+		free(operacion->cOperacion);
+		free(operacion->cRequest);
+		free(operacion->cResponse);
+		free(operacion->dOperacion);
 		free(operacion);
 	}
 	C_Vaciar(&ws->CEjecucion);
