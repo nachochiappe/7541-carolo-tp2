@@ -24,8 +24,8 @@ int TDAWS_Crear(TDAWS *ws, char **cmd) {
 	char str[50];
 	char *token;
 
-	char *path_operaciones;
-	char *path_clientes;
+	char path_operaciones[50];
+	char path_clientes[50];
 
 	FILE *arch_config = fopen(path_config,"r");
 
@@ -33,10 +33,19 @@ int TDAWS_Crear(TDAWS *ws, char **cmd) {
 		fgets(str, sizeof(str), arch_config);
 		token = strtok(str, "=");
 		if (strcmp(token, "pathOperaciones") == 0) {
-			path_operaciones = strtok(NULL, "=");
+			token = strtok(NULL, "=");
+			if (NULL != token) {
+				strcpy(path_operaciones, token);
+				path_operaciones[strlen(path_operaciones) - 2] = '\0';
+			}
+
 		}
 		else if (strcmp(token, "pathClientes") == 0) {
-			path_clientes = strtok(NULL, "=");
+			token = strtok(NULL, "=");
+			if (NULL != token) {
+				strcpy(path_clientes, token);
+				path_clientes[strlen(path_clientes) - 2] = '\0';
+			}
 		}
 		else if (strcmp(token, "pathLog") == 0) {
 			continue;
@@ -124,6 +133,8 @@ int TDAWS_Crear(TDAWS *ws, char **cmd) {
 			for (int j = 0; j <=3; j++) {
 				token = strtok(NULL, "/");
 			}
+			if (strcmp(token, "getClientById") == 0)
+				token = strtok(NULL, "/");
 
 			i++;
 			if (strcmp(cmd[i], "-d") == 0) {
@@ -184,7 +195,7 @@ int TDAWS_Consumir(TDAWS *ws) {
 int TDAWS_Destruir(TDAWS *ws) {
 	char str[50];
 	char *token;
-	char *path_log;
+	char path_log[50];
 
 	FILE *arch_config = fopen(path_config,"r");
 
@@ -192,7 +203,11 @@ int TDAWS_Destruir(TDAWS *ws) {
 		fgets(str, sizeof(str), arch_config);
 		token = strtok(str, "=");
 		if (strcmp(token, "pathLog") == 0) {
-			path_log = strtok(NULL, "=");
+			token = strtok(NULL, "=");
+			if (NULL != token) {
+				strcpy(path_log, token);
+				path_log[strlen(path_log) - 2] = '\0';
+			}
 		}
 		else {
 			printf("No existe variable 'pathLog' en archivo de configuracion.\n");
