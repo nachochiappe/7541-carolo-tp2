@@ -104,7 +104,6 @@ int TDAWS_Crear(TDAWS *ws, char **cmd) {
 	unsigned char i = 1;
 
 	if (strcmp(cmd[i], "-X") == 0) {
-		printf("TEST\n");
 		// Verifico si es GET o POST
 		i++;
 		if (strcmp(cmd[i], "GET") == 0)
@@ -227,7 +226,7 @@ int TDAWS_Destruir(TDAWS *ws) {
 
 	fclose(arch_config);
 
-	FILE *arch_log = fopen(path_log,"r+");
+	FILE *arch_log = fopen(path_log,"a");
 
 	while (C_Vacia(ws->CEjecucion) == 0) {
 		TDAWSOperacion* operacion;
