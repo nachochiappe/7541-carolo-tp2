@@ -18,7 +18,6 @@
 #define path_config "SERVERTP2GRUPAL.conf"
 
 int TDAWS_Crear(TDAWS *ws, char **cmd) {
-
 	// OBTENER VALORES DE ARCHIVO DE CONFIGURACION
 
 	char str[50];
@@ -63,8 +62,11 @@ int TDAWS_Crear(TDAWS *ws, char **cmd) {
 	ls_Crear(&ws->LOperaciones, 20);
 	char nombre_operacion[20];
 	FILE *arch_operaciones = fopen(path_operaciones,"r");
-	while (fgets(nombre_operacion, sizeof(nombre_operacion), arch_operaciones) != NULL)
+	while (fgets(nombre_operacion, sizeof(nombre_operacion), arch_operaciones) != NULL) {
+		nombre_operacion[strlen(nombre_operacion) - 2] = '\0';
 		ls_Insertar(&ws->LOperaciones, LS_SIGUIENTE, nombre_operacion);
+	}
+	ls_MoverCorriente(&ws->LOperaciones, LS_PRIMERO);
 	fclose(arch_operaciones);
 
 	// LISTA DE TDAClientes
@@ -96,13 +98,13 @@ int TDAWS_Crear(TDAWS *ws, char **cmd) {
 	C_Crear(&ws->CEjecucion, sizeof(TDAWSOperacion));
 	TDAWSOperacion *operacion = (TDAWSOperacion*) malloc(sizeof(TDAWSOperacion));
 	if (!operacion) return (-1);
-
 	if (inicializarOperacion(operacion) != 0) return (-1);
-
 	char tipo_op = 0; // 0 = POST; 1 = GET
 	enum formato tipo_formato;
 	unsigned char i = 1;
+
 	if (strcmp(cmd[i], "-X") == 0) {
+		printf("TEST\n");
 		// Verifico si es GET o POST
 		i++;
 		if (strcmp(cmd[i], "GET") == 0)
@@ -145,7 +147,6 @@ int TDAWS_Crear(TDAWS *ws, char **cmd) {
 				}
 				else return (-1);
 			}
-
 			// Completo parámetros operación
 			//operacion->cResponse = NULL;
 			//operacion->cOperacion = malloc(strlen(token) + 1);
@@ -203,6 +204,7 @@ int TDAWS_Destruir(TDAWS *ws) {
 	char str[50];
 	char *token;
 	char path_log[50];
+	int existe_log = 0;
 
 	FILE *arch_config = fopen(path_config,"r");
 
@@ -210,16 +212,17 @@ int TDAWS_Destruir(TDAWS *ws) {
 		fgets(str, sizeof(str), arch_config);
 		token = strtok(str, "=");
 		if (strcmp(token, "pathLog") == 0) {
+			existe_log++;
 			token = strtok(NULL, "=");
 			if (NULL != token) {
 				strcpy(path_log, token);
 				path_log[strlen(path_log) - 2] = '\0';
 			}
 		}
-		else {
-			printf("No existe variable 'pathLog' en archivo de configuracion.\n");
-			return (-1);
-		}
+	}
+	if (existe_log == 0) {
+		printf("No existe variable 'pathLog' en archivo de configuracion.\n");
+		return (-1);
 	}
 
 	fclose(arch_config);
@@ -227,8 +230,9 @@ int TDAWS_Destruir(TDAWS *ws) {
 	FILE *arch_log = fopen(path_log,"r+");
 
 	while (C_Vacia(ws->CEjecucion) == 0) {
-		TDAWSOperacion* operacion = (TDAWSOperacion*) malloc(sizeof(TDAWSOperacion));
-		if (!operacion) return (-1);
+		TDAWSOperacion* operacion;
+		//TDAWSOperacion* operacion = (TDAWSOperacion*) malloc(sizeof(TDAWSOperacion));
+		//if (!operacion) return (-1);
 		C_Sacar(&ws->CEjecucion, operacion);
 		// La operación getTime no se debe loguear
 		if (strcmp(operacion->cOperacion, "getTime") != 0) {

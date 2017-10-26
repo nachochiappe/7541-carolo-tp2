@@ -58,7 +58,7 @@ int getTime(TDAWS *ws, char *fecha, char por_consola) {
 
 	if (por_consola == 1) printf("%s", operacion->cResponse);
 
-	if (C_Agregar(&ws->CEjecucion, &ws->TOperacion) != 0) return (-1);
+	if (C_Agregar(&ws->CEjecucion, &ws->TOperacion) != TRUE) return (-1);
 
 	return (0);
 }
@@ -67,11 +67,13 @@ int getClientById(TDAWS *ws, char por_consola) {
 	TDAWSOperacion *operacion = (TDAWSOperacion*) malloc(sizeof(TDAWSOperacion));
 	if (!operacion) return (-1);
 
+	if (inicializarOperacion(operacion) != 0) return (-1);
+
 	getTime(ws, operacion->dOperacion, 0);
 
 	if (por_consola == 1) printf("%s", operacion->cResponse);
 
-	if (C_Agregar(&ws->CEjecucion, &ws->TOperacion) != 0) return (-1);
+	if (C_Agregar(&ws->CEjecucion, &ws->TOperacion) != TRUE) return (-1);
 
 	return (0);
 }
@@ -80,13 +82,13 @@ int getMaxIdClient(TDAWS *ws, char por_consola) {
 	TDAWSOperacion *operacion = (TDAWSOperacion*) malloc(sizeof(TDAWSOperacion));
 	if (!operacion) return (-1);
 
+	if (inicializarOperacion(operacion) != 0) return (-1);
+
 	getTime(ws, operacion->dOperacion, 0);
-
-
 
 	if (por_consola == 1) printf("%s", operacion->cResponse);
 
-	if (C_Agregar(&ws->CEjecucion, &ws->TOperacion) != 0) return (-1);
+	if (C_Agregar(&ws->CEjecucion, &ws->TOperacion) != TRUE) return (-1);
 
 	return (0);
 }
@@ -95,11 +97,13 @@ int setMaxIdClient(TDAWS *ws, char por_consola) {
 	TDAWSOperacion *operacion = (TDAWSOperacion*) malloc(sizeof(TDAWSOperacion));
 	if (!operacion) return (-1);
 
+	if (inicializarOperacion(operacion) != 0) return (-1);
+
 	getTime(ws, operacion->dOperacion, 0);
 
 	if (por_consola == 1) printf("%s", operacion->cResponse);
 
-	if (C_Agregar(&ws->CEjecucion, &ws->TOperacion) != 0) return (-1);
+	if (C_Agregar(&ws->CEjecucion, &ws->TOperacion) != TRUE) return (-1);
 
 	return (0);
 }
@@ -107,6 +111,8 @@ int setMaxIdClient(TDAWS *ws, char por_consola) {
 int setClientById(TDAWS *ws, char por_consola) {
 	TDAWSOperacion *operacion = (TDAWSOperacion*) malloc(sizeof(TDAWSOperacion));
 	if (!operacion) return (-1);
+
+	if (inicializarOperacion(operacion) != 0) return (-1);
 
 	int id_cliente = 0;
 
@@ -118,7 +124,7 @@ int setClientById(TDAWS *ws, char por_consola) {
 
 	if (por_consola == 1) printf("%s", operacion->cResponse);
 
-	if (C_Agregar(&ws->CEjecucion, &ws->TOperacion) != 0) return (-1);
+	if (C_Agregar(&ws->CEjecucion, &ws->TOperacion) != TRUE) return (-1);
 
 	return (0);
 }
@@ -127,11 +133,13 @@ int getAllClients(TDAWS *ws, char por_consola) {
 	TDAWSOperacion *operacion = (TDAWSOperacion*) malloc(sizeof(TDAWSOperacion));
 	if (!operacion) return (-1);
 
+	if (inicializarOperacion(operacion) != 0) return (-1);
+
 	getTime(ws, operacion->dOperacion, 0);
 
 	if (por_consola == 1) printf("%s", operacion->cResponse);
 
-	if (C_Agregar(&ws->CEjecucion, &ws->TOperacion) != 0) return (-1);
+	if (C_Agregar(&ws->CEjecucion, &ws->TOperacion) != TRUE) return (-1);
 
 	return (0);
 }
@@ -140,11 +148,13 @@ int getAllOperations(TDAWS *ws, char por_consola) {
 	TDAWSOperacion *operacion = (TDAWSOperacion*) malloc(sizeof(TDAWSOperacion));
 	if (!operacion) return (-1);
 
+	if (inicializarOperacion(operacion) != 0) return (-1);
+
 	getTime(ws, operacion->dOperacion, 0);
 
 	if (por_consola == 1) printf("%s", operacion->cResponse);
 
-	if (C_Agregar(&ws->CEjecucion, &ws->TOperacion) != 0) return (-1);
+	if (C_Agregar(&ws->CEjecucion, &ws->TOperacion) != TRUE) return (-1);
 
 	return (0);
 }
@@ -152,6 +162,8 @@ int getAllOperations(TDAWS *ws, char por_consola) {
 int validateOperation(TDAWS *ws, char por_consola) {
 	TDAWSOperacion *operacion = (TDAWSOperacion*) malloc(sizeof(TDAWSOperacion));
 	if (!operacion) return (-1);
+
+	if (inicializarOperacion(operacion) != 0) return (-1);
 
 	getTime(ws, operacion->dOperacion, 0);
 
@@ -186,6 +198,6 @@ int validateOperation(TDAWS *ws, char por_consola) {
 
 	if (por_consola == 1) printf("%s", operacion->cResponse);
 
-	if (C_Agregar(&ws->CEjecucion, &ws->TOperacion) != 0) return (-1);
+	if (C_Agregar(&ws->CEjecucion, &ws->TOperacion) != TRUE) return (-1);
 	return (operacion_valida);
 }
