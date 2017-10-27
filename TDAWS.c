@@ -98,7 +98,7 @@ int TDAWS_Crear(TDAWS *ws, char **cmd) {
 	C_Crear(&ws->CEjecucion, sizeof(TDAWSOperacion));
 	TDAWSOperacion *operacion = (TDAWSOperacion*) malloc(sizeof(TDAWSOperacion));
 	if (!operacion) return (-1);
-	if (inicializarOperacion(operacion) != 0) return (-1);
+
 	char tipo_op = 0; // 0 = POST; 1 = GET
 	enum formato tipo_formato;
 	unsigned char i = 1;
@@ -136,27 +136,24 @@ int TDAWS_Crear(TDAWS *ws, char **cmd) {
 			for (int j = 0; j < 2; j++) {
 				token = strtok(NULL, "/");
 			}
+
+			if (inicializarOperacion(operacion, "", token) != 0) return (-1);
+
 			if (strcmp(token, "getClientById") == 0)
 				token = strtok(NULL, "/");
 			else if (strcmp(token, "setClientById") == 0) {
 				i++;
 				if (strcmp(cmd[i], "-d") == 0) {
 					i++;
-					operacion->cRequest = cmd[i];
+					strcpy(operacion->cRequest, cmd[i]);
 				}
 				else return (-1);
 			}
 			// Completo parámetros operación
-			//operacion->cResponse = NULL;
-			//operacion->cOperacion = malloc(strlen(token) + 1);
-			strcpy(operacion->cOperacion, token);
-			//operacion->dOperacion = NULL;
 			if (tipo_formato == JSON) {
-				//operacion->cFormato = malloc(strlen("JSON") + 1);
 				strcpy(operacion->cFormato, "JSON");
 			}
 			else {
-				//operacion->cFormato = malloc(sizeof("XML") + 1);
 				strcpy(operacion->cFormato, "XML");
 			}
 			ws->TOperacion = (*operacion);
@@ -229,10 +226,10 @@ int TDAWS_Destruir(TDAWS *ws) {
 	FILE *arch_log = fopen(path_log,"a");
 
 	while (C_Vacia(ws->CEjecucion) == 0) {
-		TDAWSOperacion* operacion;
 		//TDAWSOperacion* operacion = (TDAWSOperacion*) malloc(sizeof(TDAWSOperacion));
 		//if (!operacion) return (-1);
-		C_Sacar(&ws->CEjecucion, operacion);
+		TDAWSOperacion* operacion;
+		C_Sacar(&ws->CEjecucion, &operacion);
 		// La operación getTime no se debe loguear
 		if (strcmp(operacion->cOperacion, "getTime") != 0) {
 			fputs(operacion->dOperacion, arch_log);

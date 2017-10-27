@@ -20,30 +20,37 @@ void parserJSON(TDAWS *ws) {
 
 }
 
-int inicializarOperacion(TDAWSOperacion *operacion) {
-	operacion->cFormato = malloc(5);
-	if (!operacion->cFormato) return (-1);
-	operacion->cOperacion = malloc(20);
-	if (!operacion->cOperacion) return (-1);
+int inicializarOperacion(TDAWSOperacion *operacion, char *formato, char *nombre) {
+
 	operacion->cRequest = malloc(200);
 	if (!operacion->cRequest) return (-1);
+
 	operacion->cResponse = malloc(200);
 	if (!operacion->cResponse) return (-1);
+
+	operacion->cOperacion = malloc(strlen(nombre) + 1);
+	if (!operacion->cOperacion) return (-1);
+	strcpy(operacion->cOperacion, nombre);
+
 	operacion->dOperacion = malloc(30);
 	if (!operacion->dOperacion) return (-1);
+
+	operacion->cFormato = malloc(strlen(formato) + 1);
+	if (!operacion->cFormato) return (-1);
+	strcpy(operacion->cFormato, formato);
 
 	return (0);
 }
 
 int getTime(TDAWS *ws, char *fecha, char por_consola) {
 	TDAWSOperacion *operacion = (TDAWSOperacion*) malloc(sizeof(TDAWSOperacion));
-		if (!operacion) return (-1);
+	if (!operacion) return (-1);
 
-	if (inicializarOperacion(operacion) != 0) return (-1);
+	if (inicializarOperacion(operacion, ws->TOperacion.cFormato, "getTime") != 0) return (-1);
 
 	time_t tiempo;
 	time(&tiempo);
-	fecha = ctime(&tiempo);
+	strcpy(fecha, ctime(&tiempo));
 
 	if (strcmp(ws->TOperacion.cFormato, "JSON") == 0) {
 		strcpy(operacion->cResponse, "'{\"Time\":\"");
@@ -56,9 +63,11 @@ int getTime(TDAWS *ws, char *fecha, char por_consola) {
 		strcat(operacion->cResponse, "</Time>\n");
 	}
 
+	strcpy(operacion->dOperacion, fecha);
+
 	if (por_consola == 1) printf("%s", operacion->cResponse);
 
-	if (C_Agregar(&ws->CEjecucion, &ws->TOperacion) != TRUE) return (-1);
+	if (C_Agregar(&ws->CEjecucion, &operacion) != TRUE) return (-1);
 
 	return (0);
 }
@@ -67,13 +76,13 @@ int getClientById(TDAWS *ws, char por_consola) {
 	TDAWSOperacion *operacion = (TDAWSOperacion*) malloc(sizeof(TDAWSOperacion));
 	if (!operacion) return (-1);
 
-	if (inicializarOperacion(operacion) != 0) return (-1);
+	if (inicializarOperacion(operacion, ws->TOperacion.cFormato, "getClientById") != 0) return (-1);
 
 	getTime(ws, operacion->dOperacion, 0);
 
 	if (por_consola == 1) printf("%s", operacion->cResponse);
 
-	if (C_Agregar(&ws->CEjecucion, &ws->TOperacion) != TRUE) return (-1);
+	if (C_Agregar(&ws->CEjecucion, &operacion) != TRUE) return (-1);
 
 	return (0);
 }
@@ -82,13 +91,13 @@ int getMaxIdClient(TDAWS *ws, char por_consola) {
 	TDAWSOperacion *operacion = (TDAWSOperacion*) malloc(sizeof(TDAWSOperacion));
 	if (!operacion) return (-1);
 
-	if (inicializarOperacion(operacion) != 0) return (-1);
+	if (inicializarOperacion(operacion, ws->TOperacion.cFormato, "getMaxIdClient") != 0) return (-1);
 
 	getTime(ws, operacion->dOperacion, 0);
 
 	if (por_consola == 1) printf("%s", operacion->cResponse);
 
-	if (C_Agregar(&ws->CEjecucion, &ws->TOperacion) != TRUE) return (-1);
+	if (C_Agregar(&ws->CEjecucion, &operacion) != TRUE) return (-1);
 
 	return (0);
 }
@@ -97,13 +106,13 @@ int setMaxIdClient(TDAWS *ws, char por_consola) {
 	TDAWSOperacion *operacion = (TDAWSOperacion*) malloc(sizeof(TDAWSOperacion));
 	if (!operacion) return (-1);
 
-	if (inicializarOperacion(operacion) != 0) return (-1);
+	if (inicializarOperacion(operacion, ws->TOperacion.cFormato, "setMaxIdClient") != 0) return (-1);
 
 	getTime(ws, operacion->dOperacion, 0);
 
 	if (por_consola == 1) printf("%s", operacion->cResponse);
 
-	if (C_Agregar(&ws->CEjecucion, &ws->TOperacion) != TRUE) return (-1);
+	if (C_Agregar(&ws->CEjecucion, &operacion) != TRUE) return (-1);
 
 	return (0);
 }
@@ -112,7 +121,7 @@ int setClientById(TDAWS *ws, char por_consola) {
 	TDAWSOperacion *operacion = (TDAWSOperacion*) malloc(sizeof(TDAWSOperacion));
 	if (!operacion) return (-1);
 
-	if (inicializarOperacion(operacion) != 0) return (-1);
+	if (inicializarOperacion(operacion, ws->TOperacion.cFormato, "setClientById") != 0) return (-1);
 
 	int id_cliente = 0;
 
@@ -124,7 +133,7 @@ int setClientById(TDAWS *ws, char por_consola) {
 
 	if (por_consola == 1) printf("%s", operacion->cResponse);
 
-	if (C_Agregar(&ws->CEjecucion, &ws->TOperacion) != TRUE) return (-1);
+	if (C_Agregar(&ws->CEjecucion, &operacion) != TRUE) return (-1);
 
 	return (0);
 }
@@ -133,13 +142,13 @@ int getAllClients(TDAWS *ws, char por_consola) {
 	TDAWSOperacion *operacion = (TDAWSOperacion*) malloc(sizeof(TDAWSOperacion));
 	if (!operacion) return (-1);
 
-	if (inicializarOperacion(operacion) != 0) return (-1);
+	if (inicializarOperacion(operacion, ws->TOperacion.cFormato, "getAllClients") != 0) return (-1);
 
 	getTime(ws, operacion->dOperacion, 0);
 
 	if (por_consola == 1) printf("%s", operacion->cResponse);
 
-	if (C_Agregar(&ws->CEjecucion, &ws->TOperacion) != TRUE) return (-1);
+	if (C_Agregar(&ws->CEjecucion, &operacion) != TRUE) return (-1);
 
 	return (0);
 }
@@ -148,13 +157,13 @@ int getAllOperations(TDAWS *ws, char por_consola) {
 	TDAWSOperacion *operacion = (TDAWSOperacion*) malloc(sizeof(TDAWSOperacion));
 	if (!operacion) return (-1);
 
-	if (inicializarOperacion(operacion) != 0) return (-1);
+	if (inicializarOperacion(operacion, ws->TOperacion.cFormato, "getAllOperations") != 0) return (-1);
 
 	getTime(ws, operacion->dOperacion, 0);
 
 	if (por_consola == 1) printf("%s", operacion->cResponse);
 
-	if (C_Agregar(&ws->CEjecucion, &ws->TOperacion) != TRUE) return (-1);
+	if (C_Agregar(&ws->CEjecucion, &operacion) != TRUE) return (-1);
 
 	return (0);
 }
@@ -163,7 +172,9 @@ int validateOperation(TDAWS *ws, char por_consola) {
 	TDAWSOperacion *operacion = (TDAWSOperacion*) malloc(sizeof(TDAWSOperacion));
 	if (!operacion) return (-1);
 
-	if (inicializarOperacion(operacion) != 0) return (-1);
+	if (inicializarOperacion(operacion, ws->TOperacion.cFormato, "validateOperation") != 0) return (-1);
+
+	strcpy(operacion->cRequest, ws->TOperacion.cOperacion);
 
 	getTime(ws, operacion->dOperacion, 0);
 
@@ -198,6 +209,6 @@ int validateOperation(TDAWS *ws, char por_consola) {
 
 	if (por_consola == 1) printf("%s", operacion->cResponse);
 
-	if (C_Agregar(&ws->CEjecucion, &ws->TOperacion) != TRUE) return (-1);
+	if (C_Agregar(&ws->CEjecucion, &operacion) != TRUE) return (-1);
 	return (operacion_valida);
 }
