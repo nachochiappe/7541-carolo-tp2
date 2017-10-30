@@ -49,8 +49,10 @@ int getTime(TDAWS *ws, char *fecha, char por_consola) {
 	if (inicializarOperacion(operacion, ws->TOperacion.cFormato, "getTime") != 0) return (-1);
 
 	time_t tiempo;
+	struct tm * tiempoinfo;
 	time(&tiempo);
-	strcpy(fecha, ctime(&tiempo));
+	tiempoinfo = localtime ( &tiempo );
+	strftime(fecha, 26, "%Y/%m/%d %H:%M:%S", tiempoinfo);
 
 	if (strcmp(ws->TOperacion.cFormato, "JSON") == 0) {
 		strcpy(operacion->cResponse, "'{\"Time\":\"");
