@@ -12,14 +12,6 @@
 
 #include "TDAWSOperacion.h"
 
-void parserXML(TDAWS *ws) {
-
-}
-
-void parserJSON(TDAWS *ws) {
-
-}
-
 int inicializarOperacion(TDAWSOperacion *operacion, char *formato, char *nombre) {
 
 	operacion->cRequest = malloc(200);
@@ -78,9 +70,27 @@ int getClientById(TDAWS *ws, char por_consola) {
 	TDAWSOperacion *operacion = (TDAWSOperacion*) malloc(sizeof(TDAWSOperacion));
 	if (!operacion) return (-1);
 
+	TElemCliente *cliente;
+
+	char cliente_encontrado = 0;
+
 	if (inicializarOperacion(operacion, ws->TOperacion.cFormato, "getClientById") != 0) return (-1);
 
 	getTime(ws, operacion->dOperacion, 0);
+
+	ls_ModifCorriente(ws->TClientes, LS_PRIMERO);
+	do {
+		if (ls_MoverCorriente(ws->TClientes, LS_SIGUIENTE) == FALSE) {
+			strcpy(operacion->cResponse, "El cliente no existe.\n");
+			break;
+		}
+		ls_ElemCorriente(ws->TClientes, cliente);
+		if (/*si el ID del cliente del parámetro es igual al del cliente actual de la lista*/) {
+			// TAG Elemento XML: cliente
+			strcpy(operacion->cResponse, "\n");
+			cliente_encontrado = 1;
+		}
+	} while (cliente_encontrado == 0);
 
 	if (por_consola == 1) printf("%s", operacion->cResponse);
 
@@ -148,6 +158,12 @@ int getAllClients(TDAWS *ws, char por_consola) {
 
 	getTime(ws, operacion->dOperacion, 0);
 
+	ls_ModifCorriente(ws->TClientes, LS_PRIMERO);
+	// TAG Principal: clientes
+	do {
+		// TAG Elemento XML: cliente
+	} while (ls_MoverCorriente(ws->TClientes, LS_SIGUIENTE) == TRUE);
+
 	if (por_consola == 1) printf("%s", operacion->cResponse);
 
 	if (C_Agregar(&ws->CEjecucion, &operacion) != TRUE) return (-1);
@@ -162,6 +178,12 @@ int getAllOperations(TDAWS *ws, char por_consola) {
 	if (inicializarOperacion(operacion, ws->TOperacion.cFormato, "getAllOperations") != 0) return (-1);
 
 	getTime(ws, operacion->dOperacion, 0);
+
+	ls_ModifCorriente(ws->LOperaciones, LS_PRIMERO);
+	// TAG Principal: operaciones
+	do {
+		// TAG Elemento XML: operacion
+	} while (ls_MoverCorriente(ws->LOperaciones, LS_SIGUIENTE) == TRUE);
 
 	if (por_consola == 1) printf("%s", operacion->cResponse);
 

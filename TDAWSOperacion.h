@@ -10,10 +10,6 @@
 
 #include "structs.h"
 
-void parserXML(TDAWS *ws);
-
-void parserJSON(TDAWS *ws);
-
 int inicializarOperacion(TDAWSOperacion *operacion, char *formato, char *nombre);
 
 int getTime(TDAWS *ws, char *fecha, char por_consola);
