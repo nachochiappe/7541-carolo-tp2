@@ -78,14 +78,14 @@ int getClientById(TDAWS *ws, char por_consola) {
 
 	getTime(ws, operacion->dOperacion, 0);
 
-	ls_ModifCorriente(ws->TClientes, LS_PRIMERO);
+	ls_ModifCorriente(&ws->TClientes, LS_PRIMERO);
 	do {
-		if (ls_MoverCorriente(ws->TClientes, LS_SIGUIENTE) == FALSE) {
+		if (ls_MoverCorriente(&ws->TClientes, LS_SIGUIENTE) == FALSE) {
 			strcpy(operacion->cResponse, "El cliente no existe.\n");
 			break;
 		}
-		ls_ElemCorriente(ws->TClientes, cliente);
-		if (/*si el ID del cliente del parámetro es igual al del cliente actual de la lista*/) {
+		ls_ElemCorriente(ws->TClientes, &cliente);
+		if (atoi(ws->TOperacion.cRequest) == cliente->idCliente) {
 			// TAG Elemento XML: cliente
 			strcpy(operacion->cResponse, "\n");
 			cliente_encontrado = 1;
@@ -158,11 +158,11 @@ int getAllClients(TDAWS *ws, char por_consola) {
 
 	getTime(ws, operacion->dOperacion, 0);
 
-	ls_ModifCorriente(ws->TClientes, LS_PRIMERO);
+	ls_ModifCorriente(&ws->TClientes, LS_PRIMERO);
 	// TAG Principal: clientes
 	do {
 		// TAG Elemento XML: cliente
-	} while (ls_MoverCorriente(ws->TClientes, LS_SIGUIENTE) == TRUE);
+	} while (ls_MoverCorriente(&ws->TClientes, LS_SIGUIENTE) == TRUE);
 
 	if (por_consola == 1) printf("%s", operacion->cResponse);
 
@@ -179,11 +179,11 @@ int getAllOperations(TDAWS *ws, char por_consola) {
 
 	getTime(ws, operacion->dOperacion, 0);
 
-	ls_ModifCorriente(ws->LOperaciones, LS_PRIMERO);
+	ls_ModifCorriente(&ws->LOperaciones, LS_PRIMERO);
 	// TAG Principal: operaciones
 	do {
 		// TAG Elemento XML: operacion
-	} while (ls_MoverCorriente(ws->LOperaciones, LS_SIGUIENTE) == TRUE);
+	} while (ls_MoverCorriente(&ws->LOperaciones, LS_SIGUIENTE) == TRUE);
 
 	if (por_consola == 1) printf("%s", operacion->cResponse);
 
