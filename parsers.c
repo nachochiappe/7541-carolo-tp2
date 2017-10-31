@@ -11,6 +11,8 @@
 #include <malloc.h>
 #include <memory.h>
 #include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 int concatValue(void*value, char*res){
 	char* strAux;
@@ -30,7 +32,6 @@ int llavesXML(char*key, char*res, int cierraTag){
 
 int stringToXMLTags(char*key, void*value, char*xmlTag){
 	char strAux[255] = "";
-	//printf("valor: %s \n" ,(char*)value);
 	llavesXML(key,strAux,FALSE);
 	concatValue(value,strAux);
 	llavesXML(key,strAux,TRUE);
@@ -46,10 +47,9 @@ int headerXML(char*XML){
 
 int clienteToXML(TElemCliente cli, char*clienteXML){
 	llavesXML("Cliente",clienteXML,FALSE);
-	//char* id = (char*)cli.idCliente;
-	//printf(id);
-
-	//stringToXMLTags("id",id,clienteXML);
+	char id[32] = "";
+	itoa(cli.idCliente,id,10);
+	stringToXMLTags("id",id,clienteXML);
 	stringToXMLTags("Nombre",cli.Nombre,clienteXML);
 	stringToXMLTags("Apellido",cli.Apellido,clienteXML);
 	stringToXMLTags("Telefono",cli.Telefono,clienteXML);
@@ -82,16 +82,16 @@ int addValueToJSON(char*key, void*value, char*strJSON, int next){
 	char strAux[255] = "";
 	strcat(strJSON,key);
 	strcat(strJSON,":");
-	//printf(value);
 	concatValue(value,strAux);
 	comillasJSON(strAux,next);
-	//printf("%s\n",strAux);
 	strcat(strJSON,strAux);
 	return RES_OK;
 }
 
 int clienteToJSON(TElemCliente cli, char*clienteJSON){
-	//addValueToJSON("Id",(void*)cli.idCliente,clienteJSON,TRUE);
+	char id[32] = "";
+	itoa(cli.idCliente,id,10);
+	addValueToJSON("id",id,clienteJSON,TRUE);
 	addValueToJSON("Nombre",cli.Nombre,clienteJSON,TRUE);
 	addValueToJSON("Apellido",cli.Apellido,clienteJSON,TRUE);
 	addValueToJSON("Telefono",cli.Telefono,clienteJSON,TRUE);
