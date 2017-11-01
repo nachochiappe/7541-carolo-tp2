@@ -48,7 +48,8 @@ int headerXML(char*XML){
 int clienteToXML(TElemCliente cli, char*clienteXML){
 	llavesXML("Cliente",clienteXML,FALSE);
 	char id[32] = "";
-	itoa(cli.idCliente,id,10);
+	sprintf(id, "%d", cli.idCliente);
+	//itoa(cli.idCliente,id,10);
 	stringToXMLTags("id",id,clienteXML);
 	stringToXMLTags("Nombre",cli.Nombre,clienteXML);
 	stringToXMLTags("Apellido",cli.Apellido,clienteXML);
@@ -90,7 +91,8 @@ int addValueToJSON(char*key, void*value, char*strJSON, int next){
 
 int clienteToJSON(TElemCliente cli, char*clienteJSON){
 	char id[32] = "";
-	itoa(cli.idCliente,id,10);
+	sprintf(id, "%d", cli.idCliente);
+	//itoa(cli.idCliente,id,10);
 	addValueToJSON("id",id,clienteJSON,TRUE);
 	addValueToJSON("Nombre",cli.Nombre,clienteJSON,TRUE);
 	addValueToJSON("Apellido",cli.Apellido,clienteJSON,TRUE);

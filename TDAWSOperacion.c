@@ -11,6 +11,8 @@
 #include <time.h>
 
 #include "TDAWSOperacion.h"
+#include "parsers.h"
+#include "parseoEntrada.h"
 
 #define MAX_LINEA 255
 
@@ -88,8 +90,12 @@ int getClientById(TDAWS *ws, char por_consola) {
 		}
 		ls_ElemCorriente(ws->TClientes, &cliente);
 		if (atoi(ws->TOperacion.cRequest) == cliente->idCliente) {
-			// TAG Elemento XML: cliente
-			strcpy(operacion->cResponse, "\n");
+			if (strcmp(ws->TOperacion.cFormato, "JSON") == 0) {
+				clienteToJSON(*cliente, operacion->cResponse);
+			}
+			else {
+				clienteToXML(*cliente, operacion->cResponse);
+			}
 			cliente_encontrado = 1;
 		}
 	} while (cliente_encontrado == 0);
@@ -108,6 +114,7 @@ int getMaxIdClient(TDAWS *ws, char por_consola) {
 	if (!operacion) return (-1);
 
 	TElemCliente *cliente;
+	char str[4];
 
 	if (inicializarOperacion(operacion, ws->TOperacion.cFormato, "getMaxIdClient") != 0) return (-1);
 
@@ -117,7 +124,17 @@ int getMaxIdClient(TDAWS *ws, char por_consola) {
 	while (ls_MoverCorriente(&ws->TClientes, LS_SIGUIENTE) == TRUE) {
 		ls_ElemCorriente(ws->TClientes, &cliente);
 	}
-	//Pasar el ClientID en JSON o XML al operacion->cResponse
+	sprintf(str, "%d", cliente->idCliente);
+	if (strcmp(ws->TOperacion.cFormato, "JSON") == 0) {
+		strcpy(operacion->cResponse, "'{\"ClientId\":\"");
+		strcat(operacion->cResponse, str);
+		strcat(operacion->cResponse, "\"}'");
+	}
+	else {
+		strcpy(operacion->cResponse, "<ClientId>");
+		strcat(operacion->cResponse, str);
+		strcat(operacion->cResponse, "</ClientId>");
+	}
 
 	if (por_consola == 1) printf("%s", operacion->cResponse);
 
@@ -144,7 +161,18 @@ int setMaxIdClient(TDAWS *ws, char por_consola) {
 		ls_ElemCorriente(ws->TClientes, &cliente);
 	}
 	cliente->idCliente++;
-	//Pasar el ClientID en JSON o XML al operacion->cResponse
+
+	sprintf(str, "%d", cliente->idCliente);
+	if (strcmp(ws->TOperacion.cFormato, "JSON") == 0) {
+		strcpy(operacion->cResponse, "'{\"ClientId\":\"");
+		strcat(operacion->cResponse, str);
+		strcat(operacion->cResponse, "\"}'");
+	}
+	else {
+		strcpy(operacion->cResponse, "<ClientId>");
+		strcat(operacion->cResponse, str);
+		strcat(operacion->cResponse, "</ClientId>");
+	}
 
 	FILE *arch_original = fopen("clientes.def", "r");
 	FILE *arch_nuevo = fopen("clientes.def.tmp", "w");
@@ -157,7 +185,6 @@ int setMaxIdClient(TDAWS *ws, char por_consola) {
 			fputs(linea, arch_nuevo);
 		}
 		else {
-			sprintf(str, "%d", cliente->idCliente);
 			fputs(str, arch_original);
 			fputs(";", arch_original);
 			fputs(cliente->Nombre, arch_original);
@@ -190,11 +217,19 @@ int setClientById(TDAWS *ws, char por_consola) {
 
 	if (inicializarOperacion(operacion, ws->TOperacion.cFormato, "setClientById") != 0) return (-1);
 
-	FILE *arch_original;
 	TElemCliente *cliente = malloc(sizeof(TElemCliente));
+	if (!cliente) return (-1);
+	FILE *arch_original;
 	char linea[MAX_LINEA];
 	char str[4];
 	char *token;
+
+	if (strcmp(ws->TOperacion.cFormato, "JSON") == 0) {
+		parseaClienteJSON(cliente, ws->TOperacion.cRequest);
+	}
+	else {
+		parseaClienteXML(cliente, ws->TOperacion.cRequest);
+	}
 
 	getTime(ws, operacion->dOperacion, 0);
 	if (getClientById(ws, 0) == 1) {
@@ -262,13 +297,54 @@ int getAllClients(TDAWS *ws, char por_consola) {
 
 	if (inicializarOperacion(operacion, ws->TOperacion.cFormato, "getAllClients") != 0) return (-1);
 
+	char str[4];
+	TElemCliente *cliente;
+
 	getTime(ws, operacion->dOperacion, 0);
 
-	ls_ModifCorriente(&ws->TClientes, LS_PRIMERO);
-	// TAG Principal: clientes
-	do {
-		// TAG Elemento XML: cliente
-	} while (ls_MoverCorriente(&ws->TClientes, LS_SIGUIENTE) == TRUE);
+	if (strcmp(ws->TOperacion.cFormato, "JSON") == 0) {
+		strcpy(operacion->cResponse, "'\"clientes\" :[");
+		ls_ModifCorriente(&ws->TClientes, LS_PRIMERO);
+		do {
+			ls_ElemCorriente(ws->TClientes, &cliente);
+			sprintf(str, "%d", cliente->idCliente);
+			strcat(operacion->cResponse, "{\"id\":\"");
+			strcat(operacion->cResponse, str);
+			strcat(operacion->cResponse, ",\"Nombre\":");
+			strcat(operacion->cResponse, cliente->Nombre);
+			strcat(operacion->cResponse, ",\"Apellido\":");
+			strcat(operacion->cResponse, cliente->Apellido);
+			strcat(operacion->cResponse, ",\"Telefono\":");
+			strcat(operacion->cResponse, cliente->Telefono);
+			strcat(operacion->cResponse, ",\"Mail\":");
+			strcat(operacion->cResponse, cliente->mail);
+			strcat(operacion->cResponse, ",\"Time\":");
+			strcat(operacion->cResponse, operacion->dOperacion);
+			strcat(operacion->cResponse, "\"}");
+		} while (ls_MoverCorriente(&ws->TClientes, LS_SIGUIENTE) == TRUE);
+	}
+	else {
+		strcpy(operacion->cResponse, "'<?xml version=\"1.0\" encoding=\"UTF-8\"?><Clientes>");
+		ls_ModifCorriente(&ws->TClientes, LS_PRIMERO);
+		do {
+			ls_ElemCorriente(ws->TClientes, &cliente);
+			sprintf(str, "%d", cliente->idCliente);
+			strcat(operacion->cResponse, "<Cliente><id>");
+			strcat(operacion->cResponse, str);
+			strcat(operacion->cResponse, "</id><Nombre>");
+			strcat(operacion->cResponse, cliente->Nombre);
+			strcat(operacion->cResponse, "</Nombre><Apellido>");
+			strcat(operacion->cResponse, cliente->Apellido);
+			strcat(operacion->cResponse, "</Apellido><Telefono>");
+			strcat(operacion->cResponse, cliente->Telefono);
+			strcat(operacion->cResponse, "</Telefono><mail>");
+			strcat(operacion->cResponse, cliente->mail);
+			strcat(operacion->cResponse, "</mail><Time>");
+			strcat(operacion->cResponse, operacion->dOperacion);
+			strcat(operacion->cResponse, "</Time></Cliente>");
+		} while (ls_MoverCorriente(&ws->TClientes, LS_SIGUIENTE) == TRUE);
+		strcat(operacion->cResponse, "</Clientes>");
+	}
 
 	if (por_consola == 1) printf("%s", operacion->cResponse);
 
@@ -281,15 +357,35 @@ int getAllOperations(TDAWS *ws, char por_consola) {
 	TDAWSOperacion *operacion = (TDAWSOperacion*) malloc(sizeof(TDAWSOperacion));
 	if (!operacion) return (-1);
 
+	char *operacion_actual;
+
 	if (inicializarOperacion(operacion, ws->TOperacion.cFormato, "getAllOperations") != 0) return (-1);
 
 	getTime(ws, operacion->dOperacion, 0);
 
 	ls_ModifCorriente(&ws->LOperaciones, LS_PRIMERO);
-	// TAG Principal: operaciones
-	do {
-		// TAG Elemento XML: operacion
-	} while (ls_MoverCorriente(&ws->LOperaciones, LS_SIGUIENTE) == TRUE);
+	if (strcmp(ws->TOperacion.cFormato, "JSON") == 0) {
+		strcpy(operacion->cResponse, "'\"operaciones\" :[");
+		ls_ModifCorriente(&ws->LOperaciones, LS_PRIMERO);
+		do {
+			ls_ElemCorriente(ws->LOperaciones, &operacion_actual);
+			strcat(operacion->cResponse, "{\"Operacion\":\"");
+			strcat(operacion->cResponse, operacion_actual);
+			strcat(operacion->cResponse, "\"}");
+		} while (ls_MoverCorriente(&ws->LOperaciones, LS_SIGUIENTE) == TRUE);
+		strcat(operacion->cResponse, "}");
+	}
+	else {
+		strcpy(operacion->cResponse, "'<?xml version=\"1.0\" encoding=\"UTF-8\"?><Operaciones>");
+		ls_ModifCorriente(&ws->LOperaciones, LS_PRIMERO);
+		do {
+			ls_ElemCorriente(ws->LOperaciones, &operacion_actual);
+			strcat(operacion->cResponse, "<Operacion>");
+			strcat(operacion->cResponse, operacion_actual);
+			strcat(operacion->cResponse, "</Operacion>");
+		} while (ls_MoverCorriente(&ws->LOperaciones, LS_SIGUIENTE) == TRUE);
+		strcat(operacion->cResponse, "</Operaciones>");
+	}
 
 	if (por_consola == 1) printf("%s", operacion->cResponse);
 
