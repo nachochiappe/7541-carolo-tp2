@@ -185,10 +185,10 @@ int setClientById(TDAWS *ws, char por_consola) {
 		FILE *arch_nuevo = fopen("clientes.def.tmp", "w");
 		do {
 			fgets(linea, MAX_LINEA, arch_original);
-			if (!linea) break;
+			if (linea == NULL) break;
 			token = strtok(linea, ";");
-			atoi(token);
-			if (token != cliente->idCliente) {
+			int id_cliente = atoi(token);
+			if (id_cliente != cliente->idCliente) {
 				fputs(linea, arch_nuevo);
 			}
 			else {
