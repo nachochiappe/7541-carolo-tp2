@@ -131,6 +131,9 @@ int setMaxIdClient(TDAWS *ws, char por_consola) {
 	if (!operacion) return (-1);
 
 	TElemCliente *cliente;
+	char *token;
+	char linea[MAX_LINEA];
+	char str[4];
 
 	if (inicializarOperacion(operacion, ws->TOperacion.cFormato, "setMaxIdClient") != 0) return (-1);
 
@@ -143,7 +146,36 @@ int setMaxIdClient(TDAWS *ws, char por_consola) {
 	cliente->idCliente++;
 	//Pasar el ClientID en JSON o XML al operacion->cResponse
 
-	//Modificar la línea en el archivo de clientes
+	FILE *arch_original = fopen("clientes.def", "r");
+	FILE *arch_nuevo = fopen("clientes.def.tmp", "w");
+	do {
+		fgets(linea, MAX_LINEA, arch_original);
+		if (linea == NULL) break;
+		token = strtok(linea, ";");
+		int id_cliente = atoi(token);
+		if (id_cliente != cliente->idCliente) {
+			fputs(linea, arch_nuevo);
+		}
+		else {
+			sprintf(str, "%d", cliente->idCliente);
+			fputs(str, arch_original);
+			fputs(";", arch_original);
+			fputs(cliente->Nombre, arch_original);
+			fputs(";", arch_original);
+			fputs(cliente->Apellido, arch_original);
+			fputs(";", arch_original);
+			fputs(cliente->Telefono, arch_original);
+			fputs(";", arch_original);
+			fputs(cliente->mail, arch_original);
+			fputs(";", arch_original);
+			fputs(operacion->dOperacion, arch_original);
+			fputs("\n", arch_original);
+		}
+	} while (linea != NULL);
+	fclose(arch_nuevo);
+	fclose(arch_original);
+	remove("clientes.def");
+	rename("clientes.def.tmp", "clientes.def");
 
 	if (por_consola == 1) printf("%s", operacion->cResponse);
 
@@ -161,24 +193,26 @@ int setClientById(TDAWS *ws, char por_consola) {
 	FILE *arch_original;
 	TElemCliente *cliente = malloc(sizeof(TElemCliente));
 	char linea[MAX_LINEA];
+	char str[4];
 	char *token;
 
 	getTime(ws, operacion->dOperacion, 0);
 	if (getClientById(ws, 0) == 1) {
 		cliente->idCliente = getMaxIdClient(ws, 0) + 1;
 		arch_original = fopen("clientes.def", "a");
-		fputs(arch_original, cliente->idCliente);
-		fputs(arch_original, ";");
-		fputs(arch_original, cliente->Nombre);
-		fputs(arch_original, ";");
-		fputs(arch_original, cliente->Apellido);
-		fputs(arch_original, ";");
-		fputs(arch_original, cliente->Telefono);
-		fputs(arch_original, ";");
-		fputs(arch_original, cliente->mail);
-		fputs(arch_original, ";");
-		fputs(arch_original, operacion->dOperacion);
-		fputs(arch_original, "\n");
+		sprintf(str, "%d", cliente->idCliente);
+		fputs(str, arch_original);
+		fputs(";", arch_original);
+		fputs(cliente->Nombre, arch_original);
+		fputs(";", arch_original);
+		fputs(cliente->Apellido, arch_original);
+		fputs(";", arch_original);
+		fputs(cliente->Telefono, arch_original);
+		fputs(";", arch_original);
+		fputs(cliente->mail, arch_original);
+		fputs(";", arch_original);
+		fputs(operacion->dOperacion, arch_original);
+		fputs("\n", arch_original);
 	}
 	else {
 		arch_original = fopen("clientes.def", "r");
@@ -192,28 +226,32 @@ int setClientById(TDAWS *ws, char por_consola) {
 				fputs(linea, arch_nuevo);
 			}
 			else {
-				fputs(arch_original, cliente->idCliente);
-				fputs(arch_original, ";");
-				fputs(arch_original, cliente->Nombre);
-				fputs(arch_original, ";");
-				fputs(arch_original, cliente->Apellido);
-				fputs(arch_original, ";");
-				fputs(arch_original, cliente->Telefono);
-				fputs(arch_original, ";");
-				fputs(arch_original, cliente->mail);
-				fputs(arch_original, ";");
-				fputs(arch_original, operacion->dOperacion);
-				fputs(arch_original, "\n");
+				sprintf(str, "%d", cliente->idCliente);
+				fputs(str, arch_original);
+				fputs(";", arch_original);
+				fputs(cliente->Nombre, arch_original);
+				fputs(";", arch_original);
+				fputs(cliente->Apellido, arch_original);
+				fputs(";", arch_original);
+				fputs(cliente->Telefono, arch_original);
+				fputs(";", arch_original);
+				fputs(cliente->mail, arch_original);
+				fputs(";", arch_original);
+				fputs(operacion->dOperacion, arch_original);
+				fputs("\n", arch_original);
 			}
-		} while (linea);
+		} while (linea != NULL);
 		fclose(arch_nuevo);
 	}
 	fclose(arch_original);
-
+	remove("clientes.def");
+	rename("clientes.def.tmp", "clientes.def");
 
 	if (por_consola == 1) printf("%s", operacion->cResponse);
 
 	if (C_Agregar(&ws->CEjecucion, &operacion) != TRUE) return (-1);
+
+	free(cliente);
 
 	return (0);
 }
