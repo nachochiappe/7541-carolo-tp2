@@ -1,0 +1,7 @@
+getMaxIdClient
+setMaxIdClient
+getClientById
+setClientById
+getAllClients
+getAllOperations
+validateOperation

@@ -4,11 +4,10 @@
  *  Created on: 16 Oct 2017
  *      Author: Yoel
  */
+#include "structs.h"
 
 #ifndef TDAWS_H_
 #define TDAWS_H_
-
-#include "structs.h"
 
 /* PRE: ninguna
  POST: inicializa la estructura de servicios y de clientes para poder consumir los servicios

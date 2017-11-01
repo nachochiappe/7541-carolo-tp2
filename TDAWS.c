@@ -20,11 +20,11 @@
 int TDAWS_Crear(TDAWS *ws, char **cmd) {
 	// OBTENER VALORES DE ARCHIVO DE CONFIGURACION
 
-	char str[50];
+	char str[50] = "";
 	char *token;
 
-	char path_operaciones[50];
-	char path_clientes[50];
+	char path_operaciones[50] = "";
+	char path_clientes[50] = "";
 
 	FILE *arch_config = fopen(path_config,"r");
 
@@ -35,7 +35,7 @@ int TDAWS_Crear(TDAWS *ws, char **cmd) {
 			token = strtok(NULL, "=");
 			if (NULL != token) {
 				strcpy(path_operaciones, token);
-				path_operaciones[strlen(path_operaciones) - 2] = '\0';
+				path_operaciones[strlen(path_operaciones) - 1] = '\0';
 			}
 
 		}
@@ -43,7 +43,7 @@ int TDAWS_Crear(TDAWS *ws, char **cmd) {
 			token = strtok(NULL, "=");
 			if (NULL != token) {
 				strcpy(path_clientes, token);
-				path_clientes[strlen(path_clientes) - 2] = '\0';
+				path_clientes[strlen(path_clientes) - 1] = '\0';
 			}
 		}
 		else if (strcmp(token, "pathLog") == 0) {
@@ -60,10 +60,10 @@ int TDAWS_Crear(TDAWS *ws, char **cmd) {
 	// LISTA DE OPERACIONES DISPONIBLES
 
 	ls_Crear(&ws->LOperaciones, 20);
-	char nombre_operacion[20];
+	char nombre_operacion[20] = "";
 	FILE *arch_operaciones = fopen(path_operaciones,"r");
 	while (fgets(nombre_operacion, sizeof(nombre_operacion), arch_operaciones) != NULL) {
-		nombre_operacion[strlen(nombre_operacion) - 2] = '\0';
+		nombre_operacion[strlen(nombre_operacion) - 1] = '\0';
 		ls_Insertar(&ws->LOperaciones, LS_SIGUIENTE, nombre_operacion);
 	}
 	ls_MoverCorriente(&ws->LOperaciones, LS_PRIMERO);
@@ -77,17 +77,17 @@ int TDAWS_Crear(TDAWS *ws, char **cmd) {
 	char linea_cliente[255];
 	FILE *arch_clientes = fopen(path_clientes,"r");
 	while (fgets(linea_cliente, sizeof(TElemCliente), arch_clientes) != NULL) {
-		token = strtok(linea_cliente, ";");
+		token = strtok(linea_cliente, ",");
 		cliente->idCliente = atoi(token);
-		token = strtok(NULL, ";");
+		token = strtok(NULL, ",");
 		strcpy(cliente->Nombre, token);
-		token = strtok(NULL, ";");
+		token = strtok(NULL, ",");
 		strcpy(cliente->Apellido, token);
-		token = strtok(NULL, ";");
+		token = strtok(NULL, ",");
 		strcpy(cliente->Telefono, token);
-		token = strtok(NULL, ";");
+		token = strtok(NULL, ",");
 		strcpy(cliente->mail, token);
-		token = strtok(NULL, ";");
+		token = strtok(NULL, ",");
 		strcpy(cliente->fecha, token);
 		ls_Insertar(&ws->TClientes, LS_SIGUIENTE, cliente);
 	}
