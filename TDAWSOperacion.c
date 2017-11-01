@@ -12,6 +12,8 @@
 
 #include "TDAWSOperacion.h"
 
+#define MAX_LINEA 255
+
 int inicializarOperacion(TDAWSOperacion *operacion, char *formato, char *nombre) {
 
 	operacion->cRequest = malloc(200);
@@ -94,6 +96,8 @@ int getClientById(TDAWS *ws, char por_consola) {
 
 	if (por_consola == 1) printf("%s", operacion->cResponse);
 
+	if (cliente_encontrado == 0) return (1);
+
 	if (C_Agregar(&ws->CEjecucion, &operacion) != TRUE) return (-1);
 
 	return (0);
@@ -103,24 +107,43 @@ int getMaxIdClient(TDAWS *ws, char por_consola) {
 	TDAWSOperacion *operacion = (TDAWSOperacion*) malloc(sizeof(TDAWSOperacion));
 	if (!operacion) return (-1);
 
+	TElemCliente *cliente;
+
 	if (inicializarOperacion(operacion, ws->TOperacion.cFormato, "getMaxIdClient") != 0) return (-1);
 
 	getTime(ws, operacion->dOperacion, 0);
+
+	ls_ModifCorriente(&ws->TClientes, LS_PRIMERO);
+	while (ls_MoverCorriente(&ws->TClientes, LS_SIGUIENTE) == TRUE) {
+		ls_ElemCorriente(ws->TClientes, &cliente);
+	}
+	//Pasar el ClientID en JSON o XML al operacion->cResponse
 
 	if (por_consola == 1) printf("%s", operacion->cResponse);
 
 	if (C_Agregar(&ws->CEjecucion, &operacion) != TRUE) return (-1);
 
-	return (0);
+	return (cliente->idCliente);
 }
 
 int setMaxIdClient(TDAWS *ws, char por_consola) {
 	TDAWSOperacion *operacion = (TDAWSOperacion*) malloc(sizeof(TDAWSOperacion));
 	if (!operacion) return (-1);
 
+	TElemCliente *cliente;
+
 	if (inicializarOperacion(operacion, ws->TOperacion.cFormato, "setMaxIdClient") != 0) return (-1);
 
 	getTime(ws, operacion->dOperacion, 0);
+
+	ls_ModifCorriente(&ws->TClientes, LS_PRIMERO);
+	while (ls_MoverCorriente(&ws->TClientes, LS_SIGUIENTE) == TRUE) {
+		ls_ElemCorriente(ws->TClientes, &cliente);
+	}
+	cliente->idCliente++;
+	//Pasar el ClientID en JSON o XML al operacion->cResponse
+
+	//Modificar la línea en el archivo de clientes
 
 	if (por_consola == 1) printf("%s", operacion->cResponse);
 
@@ -135,13 +158,58 @@ int setClientById(TDAWS *ws, char por_consola) {
 
 	if (inicializarOperacion(operacion, ws->TOperacion.cFormato, "setClientById") != 0) return (-1);
 
-	int id_cliente = 0;
+	FILE *arch_original;
+	TElemCliente *cliente = malloc(sizeof(TElemCliente));
+	char linea[MAX_LINEA];
+	char *token;
 
 	getTime(ws, operacion->dOperacion, 0);
-	if (getClientById(ws, 0) == 1)
-		id_cliente = getMaxIdClient(ws, 0) + 1;
+	if (getClientById(ws, 0) == 1) {
+		cliente->idCliente = getMaxIdClient(ws, 0) + 1;
+		arch_original = fopen("clientes.def", "a");
+		fputs(arch_original, cliente->idCliente);
+		fputs(arch_original, ";");
+		fputs(arch_original, cliente->Nombre);
+		fputs(arch_original, ";");
+		fputs(arch_original, cliente->Apellido);
+		fputs(arch_original, ";");
+		fputs(arch_original, cliente->Telefono);
+		fputs(arch_original, ";");
+		fputs(arch_original, cliente->mail);
+		fputs(arch_original, ";");
+		fputs(arch_original, operacion->dOperacion);
+		fputs(arch_original, "\n");
+	}
+	else {
+		arch_original = fopen("clientes.def", "r");
+		FILE *arch_nuevo = fopen("clientes.def.tmp", "w");
+		do {
+			fgets(linea, MAX_LINEA, arch_original);
+			if (!linea) break;
+			token = strtok(linea, ";");
+			atoi(token);
+			if (token != cliente->idCliente) {
+				fputs(linea, arch_nuevo);
+			}
+			else {
+				fputs(arch_original, cliente->idCliente);
+				fputs(arch_original, ";");
+				fputs(arch_original, cliente->Nombre);
+				fputs(arch_original, ";");
+				fputs(arch_original, cliente->Apellido);
+				fputs(arch_original, ";");
+				fputs(arch_original, cliente->Telefono);
+				fputs(arch_original, ";");
+				fputs(arch_original, cliente->mail);
+				fputs(arch_original, ";");
+				fputs(arch_original, operacion->dOperacion);
+				fputs(arch_original, "\n");
+			}
+		} while (linea);
+		fclose(arch_nuevo);
+	}
+	fclose(arch_original);
 
-	//setClientById
 
 	if (por_consola == 1) printf("%s", operacion->cResponse);
 
