@@ -63,7 +63,12 @@ int TDAWS_Crear(TDAWS *ws, char **cmd) {
 	char nombre_operacion[20] = "";
 	FILE *arch_operaciones = fopen(path_operaciones,"r");
 	while (fgets(nombre_operacion, sizeof(nombre_operacion), arch_operaciones) != NULL) {
+
 		nombre_operacion[strlen(nombre_operacion) - 1] = '\0';
+
+		if (nombre_operacion[strlen(nombre_operacion) - 2] == '\r')
+			nombre_operacion[strlen(nombre_operacion) - 2] = '\0';
+
 		ls_Insertar(&ws->LOperaciones, LS_SIGUIENTE, nombre_operacion);
 	}
 	ls_MoverCorriente(&ws->LOperaciones, LS_PRIMERO);
@@ -139,8 +144,10 @@ int TDAWS_Crear(TDAWS *ws, char **cmd) {
 
 			if (inicializarOperacion(operacion, "", token) != 0) return (-1);
 
-			if (strcmp(token, "getClientById") == 0)
+			if (strcmp(token, "getClientById") == 0) {
 				token = strtok(NULL, "/");
+				strcpy(operacion->cRequest, token);
+			}
 			else if (strcmp(token, "setClientById") == 0) {
 				i++;
 				if (strcmp(cmd[i], "-d") == 0) {
@@ -179,7 +186,7 @@ int TDAWS_Consumir(TDAWS *ws) {
 		setMaxIdClient(ws, 1);
 	}
 	else if (strcmp(ws->TOperacion.cOperacion, "getClientById") == 0) {
-		getClientById(ws, 1);
+		getClientById(ws, 1, 0);
 	}
 	else if (strcmp(ws->TOperacion.cOperacion, "setClientById") == 0) {
 		setClientById(ws, 1);

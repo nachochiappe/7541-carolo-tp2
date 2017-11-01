@@ -11,6 +11,9 @@
 #define RES_OK 0
 #define RES_ERROR -1
 
+#include "TDAWS.h"
+#include "parseoEntrada.h"
+
 //#define FALSE 0
 //#define TRUE -1
 

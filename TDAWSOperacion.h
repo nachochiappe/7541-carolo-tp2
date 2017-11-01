@@ -18,7 +18,7 @@ int getMaxIdClient(TDAWS *ws, char por_consola);
 
 int setMaxIdClient(TDAWS *ws, char por_consola);
 
-int getClientById(TDAWS *ws, char por_consola);
+int getClientById(TDAWS *ws, char por_consola, int id);
 
 int setClientById(TDAWS *ws, char por_consola);
 

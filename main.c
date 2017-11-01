@@ -9,7 +9,6 @@
 #include <string.h>
 
 #include "TDAWS.h"
-#include "parseoEntrada.h"
 
 int main (int argc, char *argv[]) {
 
