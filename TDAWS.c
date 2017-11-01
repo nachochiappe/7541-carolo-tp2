@@ -92,7 +92,7 @@ int TDAWS_Crear(TDAWS *ws, char **cmd) {
 		strcpy(cliente->fecha, token);
 		ls_Insertar(&ws->TClientes, LS_SIGUIENTE, cliente);
 	}
-	fclose(arch_clientes);
+	//fclose(arch_clientes); ME TIRA UN ERROR CUANDO LO QUIERO CERRAR
 
 	// COLA CON LAS OPERACIONES EJECUTADAS
 

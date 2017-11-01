@@ -168,8 +168,10 @@ int setMaxIdClient(TDAWS *ws, char por_consola) {
 
 	TElemCliente *cliente = malloc(sizeof(TElemCliente));
 	char *token;
-	char linea[MAX_LINEA];
+	char linea[MAX_LINEA], linea_temp[MAX_LINEA];
 	char str[4];
+	char clave[50];
+	char path_clientes[50], path_clientes_nuevo[53];
 
 	if (inicializarOperacion(operacion, ws->TOperacion.cFormato, "setMaxIdClient") != 0) return (-1);
 
@@ -182,6 +184,7 @@ int setMaxIdClient(TDAWS *ws, char por_consola) {
 		ls_ElemCorriente(ws->TClientes, cliente);
 	} while (ls_MoverCorriente(&ws->TClientes, LS_SIGUIENTE) == TRUE);
 
+	int id_cliente_anterior = cliente->idCliente;
 	cliente->idCliente++;
 
 	sprintf(str, "%d", cliente->idCliente);
@@ -196,35 +199,56 @@ int setMaxIdClient(TDAWS *ws, char por_consola) {
 		strcat(operacion->cResponse, "</ClientId>");
 	}
 
-	FILE *arch_original = fopen("clientes.def", "r");
-	FILE *arch_nuevo = fopen("clientes.def.tmp", "w");
-	do {
-		fgets(linea, MAX_LINEA, arch_original);
-		if (linea == NULL) break;
+	FILE *arch_config = fopen(path_config,"r");
+
+	for (unsigned int i = 0; i < 3; i++) {
+		fgets(clave, sizeof(clave), arch_config);
+		token = strtok(clave, "=");
+		if (strcmp(token, "pathOperaciones") == 0) continue;
+		else if (strcmp(token, "pathClientes") == 0) {
+			token = strtok(NULL, "=");
+			if (NULL != token) {
+				strcpy(path_clientes, token);
+				path_clientes[strlen(path_clientes) - 2] = '\0';
+				strcpy(path_clientes_nuevo, path_clientes);
+				strcat(path_clientes_nuevo, ".tmp");
+			}
+		}
+		else if (strcmp(token, "pathLog") == 0) {
+			continue;
+		}
+	}
+
+	fclose(arch_config);
+
+	FILE *arch_original = fopen(path_clientes, "r");
+	FILE *arch_nuevo = fopen(path_clientes_nuevo, "w");
+	while (fgets(linea, MAX_LINEA, arch_original)) {
+		strcpy(linea_temp, linea);
 		token = strtok(linea, ";");
 		int id_cliente = atoi(token);
-		if (id_cliente != cliente->idCliente) {
-			fputs(linea, arch_nuevo);
+		if (id_cliente != id_cliente_anterior) {
+			fputs(linea_temp, arch_nuevo);
 		}
 		else {
-			fputs(str, arch_original);
-			fputs(";", arch_original);
-			fputs(cliente->Nombre, arch_original);
-			fputs(";", arch_original);
-			fputs(cliente->Apellido, arch_original);
-			fputs(";", arch_original);
-			fputs(cliente->Telefono, arch_original);
-			fputs(";", arch_original);
-			fputs(cliente->mail, arch_original);
-			fputs(";", arch_original);
-			fputs(operacion->dOperacion, arch_original);
-			fputs("\n", arch_original);
+			fputs(str, arch_nuevo);
+			fputs(";", arch_nuevo);
+			fputs(cliente->Nombre, arch_nuevo);
+			fputs(";", arch_nuevo);
+			fputs(cliente->Apellido, arch_nuevo);
+			fputs(";", arch_nuevo);
+			fputs(cliente->Telefono, arch_nuevo);
+			fputs(";", arch_nuevo);
+			fputs(cliente->mail, arch_nuevo);
+			fputs(";", arch_nuevo);
+			fputs(operacion->dOperacion, arch_nuevo);
+			fputs("\n", arch_nuevo);
 		}
-	} while (linea != NULL);
+	}
 	fclose(arch_nuevo);
 	fclose(arch_original);
-	remove("clientes.def");
-	rename("clientes.def.tmp", "clientes.def");
+	remove(path_clientes);
+	rename(path_clientes_nuevo, path_clientes);
 
 	if (por_consola == 1) printf("%s", operacion->cResponse);
 
@@ -309,22 +333,22 @@ int setClientById(TDAWS *ws, char por_consola) {
 			token = strtok(linea, ";");
 			int id_cliente = atoi(token);
 			if (id_cliente != cliente->idCliente) {
-				fputs(linea, arch_nuevo);
+				fputs(linea_temp, arch_nuevo);
 			}
 			else {
 				sprintf(str, "%d", cliente->idCliente);
-				fputs(str, arch_original);
-				fputs(";", arch_original);
-				fputs(cliente->Nombre, arch_original);
-				fputs(";", arch_original);
-				fputs(cliente->Apellido, arch_original);
-				fputs(";", arch_original);
-				fputs(cliente->Telefono, arch_original);
-				fputs(";", arch_original);
-				fputs(cliente->mail, arch_original);
-				fputs(";", arch_original);
-				fputs(operacion->dOperacion, arch_original);
-				fputs("\n", arch_original);
+				fputs(str, arch_nuevo);
+				fputs(";", arch_nuevo);
+				fputs(cliente->Nombre, arch_nuevo);
+				fputs(";", arch_nuevo);
+				fputs(cliente->Apellido, arch_nuevo);
+				fputs(";", arch_nuevo);
+				fputs(cliente->Telefono, arch_nuevo);
+				fputs(";", arch_nuevo);
+				fputs(cliente->mail, arch_nuevo);
+				fputs(";", arch_nuevo);
+				fputs(operacion->dOperacion, arch_nuevo);
+				fputs("\n", arch_nuevo);
 			}
 		}
 		fclose(arch_nuevo);
