@@ -17,10 +17,11 @@
 #define path_config "SERVERTP2GRUPAL.conf"
 
 #define MAX_LINEA 255
+#define MAX_ID_CLIENTE 6
 
 int inicializarOperacion(TDAWSOperacion *operacion, char *formato, char *nombre) {
 
-	operacion->cRequest = malloc(200);
+	operacion->cRequest = malloc(1000);
 	if (!operacion->cRequest) return (-1);
 	strcpy(operacion->cRequest, "");
 
@@ -57,12 +58,12 @@ int getTime(TDAWS *ws, char *fecha, char por_consola) {
 	if (strcmp(ws->TOperacion.cFormato, "JSON") == 0) {
 		strcpy(operacion->cResponse, "'{\"Time\":\"");
 		strcat(operacion->cResponse, fecha);
-		strcat(operacion->cResponse, "\"}'\n");
+		strcat(operacion->cResponse, "\"}'");
 	}
 	else {
 		strcpy(operacion->cResponse, "<Time>");
 		strcat(operacion->cResponse, fecha);
-		strcat(operacion->cResponse, "</Time>\n");
+		strcat(operacion->cResponse, "</Time>");
 	}
 
 	strcpy(operacion->dOperacion, fecha);
@@ -81,7 +82,7 @@ int getClientById(TDAWS *ws, char por_consola, int id) {
 	TElemCliente *cliente = malloc(sizeof(TElemCliente));
 
 	char cliente_encontrado = 0;
-	char str[4];
+	char str[MAX_ID_CLIENTE];
 
 	if (inicializarOperacion(operacion, ws->TOperacion.cFormato, "getClientById") != 0) return (-1);
 
@@ -128,7 +129,7 @@ int getMaxIdClient(TDAWS *ws, char por_consola) {
 	if (!operacion) return (-1);
 
 	TElemCliente *cliente = malloc(sizeof(TElemCliente));
-	char str[4];
+	char str[MAX_ID_CLIENTE];
 	int max_id = 0;
 
 	if (inicializarOperacion(operacion, ws->TOperacion.cFormato, "getMaxIdClient") != 0) return (-1);
@@ -169,7 +170,7 @@ int setMaxIdClient(TDAWS *ws, char por_consola) {
 	TElemCliente *cliente = malloc(sizeof(TElemCliente));
 	char *token;
 	char linea[MAX_LINEA], linea_temp[MAX_LINEA];
-	char str[4];
+	char str[MAX_ID_CLIENTE];
 	char clave[50];
 	char path_clientes[50], path_clientes_nuevo[53];
 
@@ -209,7 +210,10 @@ int setMaxIdClient(TDAWS *ws, char por_consola) {
 			token = strtok(NULL, "=");
 			if (NULL != token) {
 				strcpy(path_clientes, token);
-				path_clientes[strlen(path_clientes) - 2] = '\0';
+				if (path_clientes[strlen(path_clientes) - 2] == '\r')
+					path_clientes[strlen(path_clientes) - 2] = '\0';
+				else
+					path_clientes[strlen(path_clientes) - 1] = '\0';
 				strcpy(path_clientes_nuevo, path_clientes);
 				strcat(path_clientes_nuevo, ".tmp");
 			}
@@ -225,22 +229,22 @@ int setMaxIdClient(TDAWS *ws, char por_consola) {
 	FILE *arch_nuevo = fopen(path_clientes_nuevo, "w");
 	while (fgets(linea, MAX_LINEA, arch_original)) {
 		strcpy(linea_temp, linea);
-		token = strtok(linea, ";");
+		token = strtok(linea, ",");
 		int id_cliente = atoi(token);
 		if (id_cliente != id_cliente_anterior) {
 			fputs(linea_temp, arch_nuevo);
 		}
 		else {
 			fputs(str, arch_nuevo);
-			fputs(";", arch_nuevo);
+			fputs(",", arch_nuevo);
 			fputs(cliente->Nombre, arch_nuevo);
-			fputs(";", arch_nuevo);
+			fputs(",", arch_nuevo);
 			fputs(cliente->Apellido, arch_nuevo);
-			fputs(";", arch_nuevo);
+			fputs(",", arch_nuevo);
 			fputs(cliente->Telefono, arch_nuevo);
-			fputs(";", arch_nuevo);
+			fputs(",", arch_nuevo);
 			fputs(cliente->mail, arch_nuevo);
-			fputs(";", arch_nuevo);
+			fputs(",", arch_nuevo);
 			fputs(operacion->dOperacion, arch_nuevo);
 			fputs("\n", arch_nuevo);
 		}
@@ -271,7 +275,7 @@ int setClientById(TDAWS *ws, char por_consola) {
 	if (!cliente) return (-1);
 	FILE *arch_original;
 	char linea[MAX_LINEA], linea_temp[MAX_LINEA];
-	char str[4];
+	char str[MAX_ID_CLIENTE];
 	char clave[50];
 	char *token;
 
@@ -287,7 +291,10 @@ int setClientById(TDAWS *ws, char por_consola) {
 			token = strtok(NULL, "=");
 			if (NULL != token) {
 				strcpy(path_clientes, token);
-				path_clientes[strlen(path_clientes) - 2] = '\0';
+				if (path_clientes[strlen(path_clientes) - 2] == '\r')
+					path_clientes[strlen(path_clientes) - 2] = '\0';
+				else
+					path_clientes[strlen(path_clientes) - 1] = '\0';
 				strcpy(path_clientes_nuevo, path_clientes);
 				strcat(path_clientes_nuevo, ".tmp");
 			}
@@ -312,15 +319,15 @@ int setClientById(TDAWS *ws, char por_consola) {
 		arch_original = fopen(path_clientes, "a");
 		sprintf(str, "%d", cliente->idCliente);
 		fputs(str, arch_original);
-		fputs(";", arch_original);
+		fputs(",", arch_original);
 		fputs(cliente->Nombre, arch_original);
-		fputs(";", arch_original);
+		fputs(",", arch_original);
 		fputs(cliente->Apellido, arch_original);
-		fputs(";", arch_original);
+		fputs(",", arch_original);
 		fputs(cliente->Telefono, arch_original);
-		fputs(";", arch_original);
+		fputs(",", arch_original);
 		fputs(cliente->mail, arch_original);
-		fputs(";", arch_original);
+		fputs(",", arch_original);
 		fputs(operacion->dOperacion, arch_original);
 		fputs("\n", arch_original);
 		fclose(arch_original);
@@ -330,7 +337,7 @@ int setClientById(TDAWS *ws, char por_consola) {
 		FILE *arch_nuevo = fopen(path_clientes_nuevo, "w");
 		while (fgets(linea, MAX_LINEA, arch_original)) {
 			strcpy(linea_temp, linea);
-			token = strtok(linea, ";");
+			token = strtok(linea, ",");
 			int id_cliente = atoi(token);
 			if (id_cliente != cliente->idCliente) {
 				fputs(linea_temp, arch_nuevo);
@@ -338,15 +345,15 @@ int setClientById(TDAWS *ws, char por_consola) {
 			else {
 				sprintf(str, "%d", cliente->idCliente);
 				fputs(str, arch_nuevo);
-				fputs(";", arch_nuevo);
+				fputs(",", arch_nuevo);
 				fputs(cliente->Nombre, arch_nuevo);
-				fputs(";", arch_nuevo);
+				fputs(",", arch_nuevo);
 				fputs(cliente->Apellido, arch_nuevo);
-				fputs(";", arch_nuevo);
+				fputs(",", arch_nuevo);
 				fputs(cliente->Telefono, arch_nuevo);
-				fputs(";", arch_nuevo);
+				fputs(",", arch_nuevo);
 				fputs(cliente->mail, arch_nuevo);
-				fputs(";", arch_nuevo);
+				fputs(",", arch_nuevo);
 				fputs(operacion->dOperacion, arch_nuevo);
 				fputs("\n", arch_nuevo);
 			}
@@ -372,28 +379,28 @@ int getAllClients(TDAWS *ws, char por_consola) {
 
 	if (inicializarOperacion(operacion, ws->TOperacion.cFormato, "getAllClients") != 0) return (-1);
 
-	char str[4];
+	char str[MAX_ID_CLIENTE];
 	TElemCliente *cliente = malloc(sizeof(TElemCliente));
 
 	getTime(ws, operacion->dOperacion, 0);
 
 	if (strcmp(ws->TOperacion.cFormato, "JSON") == 0) {
-		strcpy(operacion->cResponse, "'\"clientes\" :[");
+		strcpy(operacion->cResponse, "'\"clientes\":[");
 		ls_MoverCorriente(&ws->TClientes, LS_PRIMERO);
 		do {
 			ls_ElemCorriente(ws->TClientes, cliente);
 			sprintf(str, "%d", cliente->idCliente);
 			strcat(operacion->cResponse, "{\"id\":\"");
 			strcat(operacion->cResponse, str);
-			strcat(operacion->cResponse, ",\"Nombre\":");
+			strcat(operacion->cResponse, "\",\"Nombre\":\"");
 			strcat(operacion->cResponse, cliente->Nombre);
-			strcat(operacion->cResponse, ",\"Apellido\":");
+			strcat(operacion->cResponse, "\",\"Apellido\":\"");
 			strcat(operacion->cResponse, cliente->Apellido);
-			strcat(operacion->cResponse, ",\"Telefono\":");
+			strcat(operacion->cResponse, "\",\"Telefono\":\"");
 			strcat(operacion->cResponse, cliente->Telefono);
-			strcat(operacion->cResponse, ",\"Mail\":");
+			strcat(operacion->cResponse, "\",\"Mail\":\"");
 			strcat(operacion->cResponse, cliente->mail);
-			strcat(operacion->cResponse, ",\"Time\":");
+			strcat(operacion->cResponse, "\",\"Time\":\"");
 			strcat(operacion->cResponse, operacion->dOperacion);
 			strcat(operacion->cResponse, "\"}");
 		} while (ls_MoverCorriente(&ws->TClientes, LS_SIGUIENTE) == TRUE);
@@ -505,12 +512,12 @@ int validateOperation(TDAWS *ws, char por_consola) {
 	if (strcmp(ws->TOperacion.cFormato, "JSON") == 0) {
 		strcpy(operacion->cResponse, "'{\"valid\":\"");
 		strcat(operacion->cResponse, validez);
-		strcat(operacion->cResponse, "\"}'\n");
+		strcat(operacion->cResponse, "\"}'");
 	}
 	else {
 		strcpy(operacion->cResponse, "<valid>");
 		strcat(operacion->cResponse, validez);
-		strcat(operacion->cResponse, "</valid>\n");
+		strcat(operacion->cResponse, "</valid>");
 	}
 
 	if (por_consola == 1) printf("%s", operacion->cResponse);

@@ -35,7 +35,10 @@ int TDAWS_Crear(TDAWS *ws, char **cmd) {
 			token = strtok(NULL, "=");
 			if (NULL != token) {
 				strcpy(path_operaciones, token);
-				path_operaciones[strlen(path_operaciones) - 1] = '\0';
+				if (path_operaciones[strlen(path_operaciones) - 2] == '\r')
+					path_operaciones[strlen(path_operaciones) - 2] = '\0';
+				else
+					path_operaciones[strlen(path_operaciones) - 1] = '\0';
 			}
 
 		}
@@ -43,7 +46,10 @@ int TDAWS_Crear(TDAWS *ws, char **cmd) {
 			token = strtok(NULL, "=");
 			if (NULL != token) {
 				strcpy(path_clientes, token);
-				path_clientes[strlen(path_clientes) - 1] = '\0';
+				if (path_clientes[strlen(path_clientes) - 2] == '\r')
+					path_clientes[strlen(path_clientes) - 2] = '\0';
+				else
+					path_clientes[strlen(path_clientes) - 1] = '\0';
 			}
 		}
 		else if (strcmp(token, "pathLog") == 0) {
@@ -64,10 +70,10 @@ int TDAWS_Crear(TDAWS *ws, char **cmd) {
 	FILE *arch_operaciones = fopen(path_operaciones,"r");
 	while (fgets(nombre_operacion, sizeof(nombre_operacion), arch_operaciones) != NULL) {
 
-		nombre_operacion[strlen(nombre_operacion) - 1] = '\0';
-
 		if (nombre_operacion[strlen(nombre_operacion) - 2] == '\r')
 			nombre_operacion[strlen(nombre_operacion) - 2] = '\0';
+		else
+			nombre_operacion[strlen(nombre_operacion) - 1] = '\0';
 
 		ls_Insertar(&ws->LOperaciones, LS_SIGUIENTE, nombre_operacion);
 	}
@@ -94,6 +100,10 @@ int TDAWS_Crear(TDAWS *ws, char **cmd) {
 		strcpy(cliente->mail, token);
 		token = strtok(NULL, ",");
 		strcpy(cliente->fecha, token);
+		if (cliente->fecha[strlen(cliente->fecha) - 2] == '\r')
+			cliente->fecha[strlen(cliente->fecha) - 2] = '\0';
+		else
+			cliente->fecha[strlen(cliente->fecha) - 1] = '\0';
 		ls_Insertar(&ws->TClientes, LS_SIGUIENTE, cliente);
 	}
 	fclose(arch_clientes);
@@ -217,10 +227,8 @@ int TDAWS_Destruir(TDAWS *ws) {
 		if (strcmp(token, "pathLog") == 0) {
 			existe_log++;
 			token = strtok(NULL, "=");
-			if (NULL != token) {
+			if (NULL != token)
 				strcpy(path_log, token);
-				path_log[strlen(path_log) - 2] = '\0';
-			}
 		}
 	}
 	if (existe_log == 0) {

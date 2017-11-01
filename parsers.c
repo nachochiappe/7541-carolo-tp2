@@ -24,7 +24,7 @@ int concatValue(void*value, char*res){
 int llavesXML(char*key, char*res, int cierraTag){
 	strcat(res,"<");
 	if (cierraTag == TRUE)
-			strcat(res,"/");
+		strcat(res,"/");
 	strcat(res,key);
 	strcat(res,">");
 	return RES_OK;
@@ -93,12 +93,12 @@ int clienteToJSON(TElemCliente cli, char*clienteJSON){
 	char id[32] = "";
 	sprintf(id, "%d", cli.idCliente);
 	//itoa(cli.idCliente,id,10);
-	addValueToJSON("id",id,clienteJSON,TRUE);
-	addValueToJSON("Nombre",cli.Nombre,clienteJSON,TRUE);
-	addValueToJSON("Apellido",cli.Apellido,clienteJSON,TRUE);
-	addValueToJSON("Telefono",cli.Telefono,clienteJSON,TRUE);
-	addValueToJSON("Mail",cli.mail,clienteJSON,TRUE);
-	addValueToJSON("Time",cli.fecha,clienteJSON,FALSE);
+	addValueToJSON("\"id\"",id,clienteJSON,TRUE);
+	addValueToJSON("\"Nombre\"",cli.Nombre,clienteJSON,TRUE);
+	addValueToJSON("\"Apellido\"",cli.Apellido,clienteJSON,TRUE);
+	addValueToJSON("\"Telefono\"",cli.Telefono,clienteJSON,TRUE);
+	addValueToJSON("\"Mail\"",cli.mail,clienteJSON,TRUE);
+	addValueToJSON("\"Time\"",cli.fecha,clienteJSON,FALSE);
 	llavesJSON(clienteJSON);//encierro con llaves
 	return RES_OK;
 }
