@@ -20,7 +20,7 @@
 
 	int clienteToXML(TElemCliente cli, char*clienteXML);
 
-	int comillasJSON(char*key, char*res, int next);
+	int comillasJSON(char*key, int siguiente);
 
 	int llavesJSON(char*strJSON);
 
