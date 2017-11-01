@@ -23,9 +23,9 @@ int concatValue(void*value, char*res){
 
 int llavesXML(char*key, char*res, int cierraTag){
 	strcat(res,"<");
-	strcat(res,key);
 	if (cierraTag == TRUE)
-		strcat(res,"/");
+			strcat(res,"/");
+	strcat(res,key);
 	strcat(res,">");
 	return RES_OK;
 }

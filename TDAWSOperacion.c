@@ -20,9 +20,11 @@ int inicializarOperacion(TDAWSOperacion *operacion, char *formato, char *nombre)
 
 	operacion->cRequest = malloc(200);
 	if (!operacion->cRequest) return (-1);
+	strcpy(operacion->cRequest, "");
 
-	operacion->cResponse = malloc(200);
+	operacion->cResponse = malloc(1000);
 	if (!operacion->cResponse) return (-1);
+	strcpy(operacion->cResponse, "");
 
 	operacion->cOperacion = malloc(strlen(nombre) + 1);
 	if (!operacion->cOperacion) return (-1);
@@ -74,23 +76,21 @@ int getClientById(TDAWS *ws, char por_consola) {
 	TDAWSOperacion *operacion = (TDAWSOperacion*) malloc(sizeof(TDAWSOperacion));
 	if (!operacion) return (-1);
 
-	TElemCliente *cliente;
+	TElemCliente *cliente = malloc(sizeof(TElemCliente));
 
 	char cliente_encontrado = 0;
 
 	if (inicializarOperacion(operacion, ws->TOperacion.cFormato, "getClientById") != 0) return (-1);
 
+	strcpy(operacion->cRequest, ws->TOperacion.cRequest);
+
 	getTime(ws, operacion->dOperacion, 0);
 
-	ls_ModifCorriente(&ws->TClientes, LS_PRIMERO);
+	ls_MoverCorriente(&ws->TClientes, LS_PRIMERO);
 	do {
-		if (ls_MoverCorriente(&ws->TClientes, LS_SIGUIENTE) == FALSE) {
-			strcpy(operacion->cResponse, "El cliente no existe.\n");
-			break;
-		}
-		ls_ElemCorriente(ws->TClientes, &cliente);
-		if (atoi(ws->TOperacion.cRequest) == cliente->idCliente) {
-			if (strcmp(ws->TOperacion.cFormato, "JSON") == 0) {
+		ls_ElemCorriente(ws->TClientes, cliente);
+		if (atoi(operacion->cRequest) == cliente->idCliente) {
+			if (strcmp(operacion->cFormato, "JSON") == 0) {
 				clienteToJSON(*cliente, operacion->cResponse);
 			}
 			else {
@@ -98,9 +98,15 @@ int getClientById(TDAWS *ws, char por_consola) {
 			}
 			cliente_encontrado = 1;
 		}
+		if (ls_MoverCorriente(&ws->TClientes, LS_SIGUIENTE) == FALSE && cliente_encontrado == 0) {
+			strcpy(operacion->cResponse, "El cliente no existe.\n");
+			break;
+		}
 	} while (cliente_encontrado == 0);
 
 	if (por_consola == 1) printf("%s", operacion->cResponse);
+
+	free(cliente);
 
 	if (cliente_encontrado == 0) return (1);
 
@@ -113,17 +119,19 @@ int getMaxIdClient(TDAWS *ws, char por_consola) {
 	TDAWSOperacion *operacion = (TDAWSOperacion*) malloc(sizeof(TDAWSOperacion));
 	if (!operacion) return (-1);
 
-	TElemCliente *cliente;
+	TElemCliente *cliente = malloc(sizeof(TElemCliente));
 	char str[4];
 
 	if (inicializarOperacion(operacion, ws->TOperacion.cFormato, "getMaxIdClient") != 0) return (-1);
 
+	strcpy(operacion->cRequest, ws->TOperacion.cRequest);
+
 	getTime(ws, operacion->dOperacion, 0);
 
-	ls_ModifCorriente(&ws->TClientes, LS_PRIMERO);
-	while (ls_MoverCorriente(&ws->TClientes, LS_SIGUIENTE) == TRUE) {
-		ls_ElemCorriente(ws->TClientes, &cliente);
-	}
+	ls_MoverCorriente(&ws->TClientes, LS_PRIMERO);
+	do {
+		ls_ElemCorriente(ws->TClientes, cliente);
+	} while (ls_MoverCorriente(&ws->TClientes, LS_SIGUIENTE) == TRUE);
 	sprintf(str, "%d", cliente->idCliente);
 	if (strcmp(ws->TOperacion.cFormato, "JSON") == 0) {
 		strcpy(operacion->cResponse, "'{\"ClientId\":\"");
@@ -138,6 +146,8 @@ int getMaxIdClient(TDAWS *ws, char por_consola) {
 
 	if (por_consola == 1) printf("%s", operacion->cResponse);
 
+	free(cliente);
+
 	if (C_Agregar(&ws->CEjecucion, &operacion) != TRUE) return (-1);
 
 	return (cliente->idCliente);
@@ -147,19 +157,22 @@ int setMaxIdClient(TDAWS *ws, char por_consola) {
 	TDAWSOperacion *operacion = (TDAWSOperacion*) malloc(sizeof(TDAWSOperacion));
 	if (!operacion) return (-1);
 
-	TElemCliente *cliente;
+	TElemCliente *cliente = malloc(sizeof(TElemCliente));
 	char *token;
 	char linea[MAX_LINEA];
 	char str[4];
 
 	if (inicializarOperacion(operacion, ws->TOperacion.cFormato, "setMaxIdClient") != 0) return (-1);
 
+	strcpy(operacion->cRequest, ws->TOperacion.cRequest);
+
 	getTime(ws, operacion->dOperacion, 0);
 
-	ls_ModifCorriente(&ws->TClientes, LS_PRIMERO);
-	while (ls_MoverCorriente(&ws->TClientes, LS_SIGUIENTE) == TRUE) {
-		ls_ElemCorriente(ws->TClientes, &cliente);
-	}
+	ls_MoverCorriente(&ws->TClientes, LS_PRIMERO);
+	do {
+		ls_ElemCorriente(ws->TClientes, cliente);
+	} while (ls_MoverCorriente(&ws->TClientes, LS_SIGUIENTE) == TRUE);
+
 	cliente->idCliente++;
 
 	sprintf(str, "%d", cliente->idCliente);
@@ -205,6 +218,8 @@ int setMaxIdClient(TDAWS *ws, char por_consola) {
 	rename("clientes.def.tmp", "clientes.def");
 
 	if (por_consola == 1) printf("%s", operacion->cResponse);
+
+	free(cliente);
 
 	if (C_Agregar(&ws->CEjecucion, &operacion) != TRUE) return (-1);
 
@@ -298,15 +313,15 @@ int getAllClients(TDAWS *ws, char por_consola) {
 	if (inicializarOperacion(operacion, ws->TOperacion.cFormato, "getAllClients") != 0) return (-1);
 
 	char str[4];
-	TElemCliente *cliente;
+	TElemCliente *cliente = malloc(sizeof(TElemCliente));
 
 	getTime(ws, operacion->dOperacion, 0);
 
 	if (strcmp(ws->TOperacion.cFormato, "JSON") == 0) {
 		strcpy(operacion->cResponse, "'\"clientes\" :[");
-		ls_ModifCorriente(&ws->TClientes, LS_PRIMERO);
+		ls_MoverCorriente(&ws->TClientes, LS_PRIMERO);
 		do {
-			ls_ElemCorriente(ws->TClientes, &cliente);
+			ls_ElemCorriente(ws->TClientes, cliente);
 			sprintf(str, "%d", cliente->idCliente);
 			strcat(operacion->cResponse, "{\"id\":\"");
 			strcat(operacion->cResponse, str);
@@ -325,9 +340,9 @@ int getAllClients(TDAWS *ws, char por_consola) {
 	}
 	else {
 		strcpy(operacion->cResponse, "'<?xml version=\"1.0\" encoding=\"UTF-8\"?><Clientes>");
-		ls_ModifCorriente(&ws->TClientes, LS_PRIMERO);
+		ls_MoverCorriente(&ws->TClientes, LS_PRIMERO);
 		do {
-			ls_ElemCorriente(ws->TClientes, &cliente);
+			ls_ElemCorriente(ws->TClientes, cliente);
 			sprintf(str, "%d", cliente->idCliente);
 			strcat(operacion->cResponse, "<Cliente><id>");
 			strcat(operacion->cResponse, str);
@@ -343,10 +358,12 @@ int getAllClients(TDAWS *ws, char por_consola) {
 			strcat(operacion->cResponse, operacion->dOperacion);
 			strcat(operacion->cResponse, "</Time></Cliente>");
 		} while (ls_MoverCorriente(&ws->TClientes, LS_SIGUIENTE) == TRUE);
-		strcat(operacion->cResponse, "</Clientes>");
+		strcat(operacion->cResponse, "</Clientes>'");
 	}
 
 	if (por_consola == 1) printf("%s", operacion->cResponse);
+
+	free(cliente);
 
 	if (C_Agregar(&ws->CEjecucion, &operacion) != TRUE) return (-1);
 
@@ -357,18 +374,19 @@ int getAllOperations(TDAWS *ws, char por_consola) {
 	TDAWSOperacion *operacion = (TDAWSOperacion*) malloc(sizeof(TDAWSOperacion));
 	if (!operacion) return (-1);
 
-	char *operacion_actual;
+	char *operacion_actual = malloc(sizeof(TDAWSOperacion));
+	if (!operacion_actual) return (-1);
 
 	if (inicializarOperacion(operacion, ws->TOperacion.cFormato, "getAllOperations") != 0) return (-1);
 
 	getTime(ws, operacion->dOperacion, 0);
 
-	ls_ModifCorriente(&ws->LOperaciones, LS_PRIMERO);
+	ls_MoverCorriente(&ws->LOperaciones, LS_PRIMERO);
 	if (strcmp(ws->TOperacion.cFormato, "JSON") == 0) {
 		strcpy(operacion->cResponse, "'\"operaciones\" :[");
-		ls_ModifCorriente(&ws->LOperaciones, LS_PRIMERO);
+		ls_MoverCorriente(&ws->LOperaciones, LS_PRIMERO);
 		do {
-			ls_ElemCorriente(ws->LOperaciones, &operacion_actual);
+			ls_ElemCorriente(ws->LOperaciones, operacion_actual);
 			strcat(operacion->cResponse, "{\"Operacion\":\"");
 			strcat(operacion->cResponse, operacion_actual);
 			strcat(operacion->cResponse, "\"}");
@@ -377,17 +395,19 @@ int getAllOperations(TDAWS *ws, char por_consola) {
 	}
 	else {
 		strcpy(operacion->cResponse, "'<?xml version=\"1.0\" encoding=\"UTF-8\"?><Operaciones>");
-		ls_ModifCorriente(&ws->LOperaciones, LS_PRIMERO);
+		ls_MoverCorriente(&ws->LOperaciones, LS_PRIMERO);
 		do {
-			ls_ElemCorriente(ws->LOperaciones, &operacion_actual);
+			ls_ElemCorriente(ws->LOperaciones, operacion_actual);
 			strcat(operacion->cResponse, "<Operacion>");
 			strcat(operacion->cResponse, operacion_actual);
 			strcat(operacion->cResponse, "</Operacion>");
 		} while (ls_MoverCorriente(&ws->LOperaciones, LS_SIGUIENTE) == TRUE);
-		strcat(operacion->cResponse, "</Operaciones>");
+		strcat(operacion->cResponse, "</Operaciones>'");
 	}
 
 	if (por_consola == 1) printf("%s", operacion->cResponse);
+
+	free(operacion_actual);
 
 	if (C_Agregar(&ws->CEjecucion, &operacion) != TRUE) return (-1);
 
@@ -416,7 +436,7 @@ int validateOperation(TDAWS *ws, char por_consola) {
 			strcpy(validez, "true");
 		}
 		else
-			if (ls_MoverCorriente(&ws->LOperaciones, LS_SIGUIENTE) == 0)
+			if (ls_MoverCorriente(&ws->LOperaciones, LS_SIGUIENTE) == TRUE)
 				ls_ElemCorriente(ws->LOperaciones, nombre_operacion);
 			else
 				break;
