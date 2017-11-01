@@ -92,7 +92,7 @@ int TDAWS_Crear(TDAWS *ws, char **cmd) {
 		strcpy(cliente->fecha, token);
 		ls_Insertar(&ws->TClientes, LS_SIGUIENTE, cliente);
 	}
-	//fclose(arch_clientes);
+	fclose(arch_clientes);
 
 	// COLA CON LAS OPERACIONES EJECUTADAS
 
@@ -182,7 +182,7 @@ int TDAWS_Consumir(TDAWS *ws) {
 		setMaxIdClient(ws, 1);
 	}
 	else if (strcmp(ws->TOperacion.cOperacion, "getClientById") == 0) {
-		getClientById(ws, 1);
+		getClientById(ws, 1, 0);
 	}
 	else if (strcmp(ws->TOperacion.cOperacion, "setClientById") == 0) {
 		setClientById(ws, 1);
